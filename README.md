@@ -23,6 +23,7 @@ Voraussetzungen: Windows 11, Python 3.11 (64 Bit), PowerShell. Installation der 
 ```powershell
 .\scripts\install-dev.ps1 -Plan -IncludeMcp
 .\scripts\install-dev.ps1 -IncludeMcp
+$env:VOXBRIDGE_PROFILE_ROOT = Join-Path $env:LOCALAPPDATA 'OMOI-VoxBridge-Standalone'
 .\.venv\Scripts\voxbridge-doctor.exe
 .\.venv\Scripts\voxbridge-standalone.exe
 ```
@@ -67,6 +68,7 @@ Die Oberfläche bleibt von Inferenz und Gerätezugriff getrennt. Sitzungs-IDs ve
 
 | Datei | Inhalt |
 | --- | --- |
+| [Ordner und Dateien](docs/DATEIEN.md) | Einfache Pfade, Dateikarte und Konfigurationsordner |
 | [Architektur](docs/ARCHITEKTUR.md) | Module, Datenfluss und Windows-Schnittstellen |
 | [Installation](docs/INSTALLATION.md) | Wheel, lokale Laufzeiten, API-Konfiguration und Sandbox |
 | [Projektvorstellung](docs/PROJEKTVORSTELLUNG.md) | Ablauf einer Kurzpräsentation mit Offline-Demo |

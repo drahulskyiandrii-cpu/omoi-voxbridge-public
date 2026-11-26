@@ -27,6 +27,16 @@ class PresentationAssetsTests(unittest.TestCase):
         for module in modules:
             self.assertTrue((ROOT / "src/voxbridge" / module).is_file(), module)
 
+    def test_file_map_covers_runtime_and_helper_scripts(self):
+        text = (DOCS / "docs/DATEIEN.md").read_text(encoding="utf-8")
+        modules = re.findall(r"^\| `([a-zA-Z0-9_]+\.(?:py|mjs|ps1))` \|", text, re.M)
+        actual = {p.name for p in (ROOT / "src/voxbridge").iterdir()
+                  if p.is_file() and p.suffix in {".py", ".mjs", ".ps1"}}
+        self.assertEqual(set(modules), actual)
+        self.assertEqual(len(modules), len(actual))
+        for script in re.findall(r"^\| `(scripts/[^\x60]+)` \|", text, re.M):
+            self.assertTrue((ROOT / script).is_file(), script)
+
     def test_offline_demo_from_source(self):
         keys = {"SYSTEMROOT", "WINDIR", "SYSTEMDRIVE", "PATH", "TEMP", "TMP",
                 "USERPROFILE", "APPDATA", "LOCALAPPDATA", "HOME"}
