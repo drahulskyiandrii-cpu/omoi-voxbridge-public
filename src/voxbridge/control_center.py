@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 
 STT_CHOICES = (
+    ("groq_cloud", "Groq Whisper Large V3 - Cloud / API"),
     ("mini_cpu", "Whisper Medium — CPU / Qualität"),
     ("mini_worker", "Faster-Whisper Small — CUDA / GPU"),
     ("openai_cloud", "OpenAI — Cloud / API"),

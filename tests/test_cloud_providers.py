@@ -8,7 +8,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 from voxbridge.analysis import AnalysisRequest
 from voxbridge.analysis_providers import ProviderFailure, execute_analysis
-from voxbridge.cloud_providers import OpenAIResponses, OpenAIFileSTT, CartesiaTTSProvider, close_provider
+from voxbridge.cloud_providers import OpenAIResponses, OpenAIFileSTT, GroqFileSTT, CartesiaTTSProvider, close_provider
 from voxbridge.stt import SpeechFailure
 
 
@@ -201,3 +201,61 @@ class TestCartesia(unittest.TestCase):
         provider = CartesiaTTSProvider(voice_id="example-voice", client=client)
         with self.assertRaisesRegex(ProviderFailure, "INVALID_AUDIO"):
             provider.synthesize("Hallo")
+
+
+class TestGroqSTT(unittest.TestCase):
+    def test_explicit_language_and_auto_payload(self):
+        import httpx
+        calls = []
+        def handler(request):
+            calls.append(request)
+            return httpx.Response(200, json={"text": "  Guten Morgen  "})
+        with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+            with GroqFileSTT(client=client) as provider:
+                self.assertEqual(provider.transcribe(wav_silence(), "de"), "Guten Morgen")
+                self.assertEqual(provider.transcribe(wav_silence(), "auto"), "Guten Morgen")
+            self.assertFalse(client.is_closed)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(str(calls[0].url), GroqFileSTT.URL)
+        self.assertIn(b'whisper-large-v3', calls[0].content)
+        self.assertIn(b'name="language"', calls[0].content)
+        self.assertNotIn(b'name="language"', calls[1].content)
+
+    def test_invalid_input_and_cancel_never_post(self):
+        client = Mock()
+        provider = GroqFileSTT(client=client)
+        for wav, language in ((b"bad", "de"), (wav_silence(), "xx")):
+            with self.assertRaises(SpeechFailure):
+                provider.transcribe(wav, language)
+        provider.cancel()
+        with self.assertRaisesRegex(SpeechFailure, "GROQ_STT_CANCELLED"):
+            provider.transcribe(wav_silence(), "de")
+        client.post.assert_not_called()
+
+    def test_error_and_malformed_result_no_fallback(self):
+        import httpx
+        for status, data, code in (
+            (401, {"error":"private"}, "AUTH"),
+            (429, {"error":"private"}, "RATE_LIMIT"),
+            (302, {"error":"private"}, "UNAVAILABLE"),
+            (200, {"text":None}, "INVALID_RESULT"),
+            (200, {"text":"bad"+chr(0)}, "INVALID_RESULT"),
+        ):
+            calls = []
+            def handler(request):
+                calls.append(request)
+                return httpx.Response(status, json=data, headers={"Location":"https://example.invalid"})
+            with self.subTest(status=status, code=code), httpx.Client(transport=httpx.MockTransport(handler)) as c:
+                with self.assertRaisesRegex(SpeechFailure, "^GROQ_STT_"+code+"$"):
+                    GroqFileSTT(client=c).transcribe(wav_silence(), "ru")
+                self.assertEqual(len(calls),1)
+
+    def test_owned_transport_configuration(self):
+        with patch("httpx.Client") as factory:
+            provider=GroqFileSTT(api_key="synthetic")
+            self.assertFalse(factory.call_args.kwargs["follow_redirects"])
+            self.assertFalse(factory.call_args.kwargs["trust_env"])
+            provider.close()
+            factory.return_value.close.assert_called_once()
+        with self.assertRaisesRegex(SpeechFailure,"GROQ_API_KEY"):
+            GroqFileSTT(api_key="")

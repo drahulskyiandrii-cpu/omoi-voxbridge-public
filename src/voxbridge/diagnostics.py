@@ -71,6 +71,7 @@ def collect(*, config_dir: Path | None = None, environ=None, package_version=ver
             "legacy compatibility; standalone root not configured")
 
     for label, key in (("OpenAI credential", "OPENAI_API_KEY"),
+                       ("Groq credential", "GROQ_API_KEY"),
                        ("Cartesia credential", "CARTESIA_API_KEY"),
                        ("Anthropic credential", "ANTHROPIC_API_KEY")):
         configured = bool(env.get(key))
@@ -91,14 +92,16 @@ def collect(*, config_dir: Path | None = None, environ=None, package_version=ver
     read("caption_preferences", "captions.json", load_caption_preferences)
     if settings is not None:
         shared_missing = settings.stt_backend == "shared" and len(env.get("OMOI_SPEECH_CORE_STT_TOKEN", "")) < 32
-        add("STT mode", "blocked" if shared_missing else "configured",
+        groq_missing = settings.stt_backend == "groq_cloud" and not env.get("GROQ_API_KEY")
+        add("STT mode", "blocked" if shared_missing or groq_missing else "configured",
             "shared token missing" if shared_missing else
+            "Groq credential missing" if groq_missing else
             settings.stt_backend + "; manual dictation only; inference untested")
         add("Microphone", "configured", "explicit device" if settings.microphone_id else "system default; availability not tested")
         add("Cartesia voice", "configured" if settings.cartesia_voice_id else "not_configured",
             "presence only; ownership and language quality not tested")
     if permissions is not None:
-        add("standing permissions", "ready", f"{sum(asdict(permissions).values())} of 7 enabled")
+        add("standing permissions", "ready", f"{sum(asdict(permissions).values())} of {len(asdict(permissions))} enabled")
     add("native audio/hotkeys", "untested", "requires interactive acceptance")
     add("cloud model access", "untested", "requires authorized live requests")
     add("local models", "untested", "no inference, GPU probe or download")

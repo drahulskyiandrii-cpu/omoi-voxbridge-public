@@ -6,6 +6,9 @@ import tempfile
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
+CLOUD_STT_BACKENDS = frozenset({"openai_cloud", "groq_cloud"})
+
+
 @dataclass(frozen=True)
 class Settings:
     language: str = "de"
@@ -102,7 +105,7 @@ class Settings:
             raise ValueError("INVALID_STT_ENHANCEMENT")
         if type(self.local_partial_enabled) is not bool:
             raise ValueError("INVALID_LOCAL_PARTIAL_SETTING")
-        if not isinstance(self.stt_backend, str) or self.stt_backend not in {"openai_cloud", "shared", "mini_worker", "mini_cpu"}:
+        if not isinstance(self.stt_backend, str) or self.stt_backend not in CLOUD_STT_BACKENDS | {"shared", "mini_worker", "mini_cpu"}:
             raise ValueError("INVALID_BACKEND")
         if self.tts_transport not in ("sse", "bytes", "qwen_base", "qwen_cf050"):
             raise ValueError("INVALID_TTS_TRANSPORT")

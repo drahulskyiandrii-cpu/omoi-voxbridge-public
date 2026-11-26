@@ -9,6 +9,7 @@ from .config import config_path, write_json_atomic
 @dataclass(frozen=True)
 class CloudPermissions:
     dictation_openai: bool = False
+    dictation_groq: bool = False
     analysis_openai: bool = False
     analysis_anthropic: bool = False
     vision_openai: bool = False

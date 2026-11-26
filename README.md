@@ -137,7 +137,7 @@ Fenster noch zu einer unangekuendigten Cloud-Anfrage fuehren.
 
 | Funktion | Implementierung | Noch zu pruefen |
 | --- | --- | --- |
-| Diktat | OpenAI; OpenVINO CPU; Faster-Whisper CUDA | reale Zielanwendungen, GPU |
+| Diktat | OpenAI; Groq; OpenVINO CPU; Faster-Whisper CUDA | reale Zielanwendungen, GPU |
 | Vorlesen | Cartesia; separat qualifizierter Qwen-Worker | Audioausgabe, autonomer Qwen-Worker |
 | Analyse | OCR; OpenAI; lokale GGUF-Modelle; optional Anthropic | reale Bildschirmregion, lokale Modelle |
 | Live-Untertitel | OpenAI Realtime, optional Cloud-Uebersetzung | WASAPI, Overlay, laengere Sitzungen |
@@ -149,7 +149,9 @@ Erreichbarkeit geprueft. Das ist keine Garantie fuer zukuenftige Verfuegbarkeit,
 Kontingente oder Audioqualitaet. Andere Provider erfordern gesonderte Abnahme.
 Vor einem Aufruf muessen Zugangsdaten und die erforderliche Freigabe vorhanden
 sein. Cloud-Schluessel werden zur Laufzeit ueber Umgebungsvariablen gelesen
-(OPENAI_API_KEY, CARTESIA_API_KEY, optional ANTHROPIC_API_KEY).
+(OPENAI_API_KEY, GROQ_API_KEY, CARTESIA_API_KEY, optional ANTHROPIC_API_KEY).
+Groq Whisper Large V3 verarbeitet abgeschlossene Aufnahmen, keine Live-Untertitel.
+Die Groq-Freigabe ist getrennt von OpenAI. Kosten sind je nach Tarif moeglich.
 Nicht in Dateien oder Git speichern.
 
 ## Freigabekriterien

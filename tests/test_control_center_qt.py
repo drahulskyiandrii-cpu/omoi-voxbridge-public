@@ -146,7 +146,7 @@ class SimpleNavigationTests(unittest.TestCase):
                           set_backend=backend,set_language=language)
         self.addCleanup(self.destroy,dlg)
         self.assertEqual(dlg.engine.currentData(),"mini_worker")
-        self.assertEqual({dlg.engine.itemData(i) for i in range(dlg.engine.count())},{"mini_cpu","mini_worker","openai_cloud"})
+        self.assertEqual({dlg.engine.itemData(i) for i in range(dlg.engine.count())},{"mini_cpu","mini_worker","openai_cloud","groq_cloud"})
         self.assertEqual(dlg.language.currentData(),"ru")
         backend.assert_not_called()
         language.assert_not_called()

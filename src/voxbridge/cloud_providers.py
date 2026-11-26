@@ -1,7 +1,8 @@
 """Opt-in cloud STT/LLM/TTS adapters. Importing this file makes no API calls.
 
 Clients are injected in unit tests. Production uses official OpenAI and Cartesia
-Python SDKs; no credentials, request text or audio are logged.
+Python SDKs and a bounded HTTPX client for Groq; no credentials, request text
+or audio are logged.
 """
 from __future__ import annotations
 
@@ -272,6 +273,65 @@ class OpenAIFileSTT(_OwnedSDK):
             raise
         except Exception as exc:
             raise SpeechFailure(_cloud_error(exc, "OPENAI_STT")) from None
+
+
+class GroqFileSTT(_OwnedSDK):
+    """Explicit completed-recording STT; no fallback, redirects or retries."""
+
+    is_cloud = True
+    URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+    MODEL = "whisper-large-v3"
+
+    def __init__(self, *, api_key: str | None = None, client: Any = None):
+        key = api_key if api_key is not None else os.environ.get("GROQ_API_KEY", "")
+        if client is None and (not key or any(not 33 <= ord(c) <= 126 for c in key)):
+            raise SpeechFailure("GROQ_API_KEY_MISSING_OR_INVALID")
+        self._cancel = threading.Event()
+        self._owns_client = client is None
+        if client is None:
+            import httpx
+            from .cloud_http import DeadlineTransport
+            client = httpx.Client(
+                headers={"Authorization": "Bearer " + key},
+                timeout=15, follow_redirects=False, trust_env=False,
+                transport=DeadlineTransport(30, max_bytes=131072))
+        self.client = client
+
+    def cancel(self):
+        self._cancel.set()
+
+    def transcribe(self, wav: bytes, language: str = "auto") -> str:
+        _validate_wav(wav)
+        if language not in _LANGUAGES | {"auto"}:
+            raise SpeechFailure("UNSUPPORTED_LANGUAGE")
+        fields = {"model": self.MODEL, "temperature": "0", "response_format": "json"}
+        if language != "auto":
+            fields["language"] = language
+        try:
+            with cloud_budget(30, self._cancel, max_bytes=131072):
+                response = self.client.post(
+                    self.URL, files={"file": ("recording.wav", wav, "audio/wav")},
+                    data=fields)
+                response.raise_for_status()
+                result = response.json()
+                text = result.get("text") if isinstance(result, dict) else None
+                if not isinstance(text, str) or len(text) > 24000 or chr(0) in text:
+                    raise SpeechFailure("GROQ_STT_INVALID_RESULT")
+                if self._cancel.is_set():
+                    raise SpeechFailure("GROQ_STT_CANCELLED")
+                return text.strip()
+        except SpeechFailure:
+            raise
+        except Exception as exc:
+            # HTTPX exceptions carry their response, not a direct status code.
+            response = getattr(exc, "response", None)
+            status = getattr(response, "status_code", None)
+            codes = {400: "BAD_REQUEST", 401: "AUTH", 403: "PERMISSION",
+                     413: "REQUEST_TOO_LARGE", 429: "RATE_LIMIT",
+                     500: "SERVER_ERROR", 503: "SERVER_ERROR"}
+            if type(status) is int:
+                raise SpeechFailure("GROQ_STT_" + codes.get(status, "UNAVAILABLE")) from None
+            raise SpeechFailure(_cloud_error(exc, "GROQ_STT")) from None
 
 
 class CartesiaTTSProvider(_OwnedSDK):

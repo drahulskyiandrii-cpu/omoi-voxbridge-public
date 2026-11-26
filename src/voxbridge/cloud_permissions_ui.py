@@ -5,6 +5,7 @@ from .cloud_permissions import CloudPermissions, load_permissions, save_permissi
 
 
 LABELS = {
+    "dictation_groq": "Diktieren / Groq (Mikrofon)",
     "dictation_openai": "Diktieren / Диктовка — OpenAI (Mikrofon / микрофон)",
     "analysis_openai": "Textanalyse / Анализ текста — OpenAI",
     "analysis_anthropic": "Textanalyse / Анализ текста — Anthropic",

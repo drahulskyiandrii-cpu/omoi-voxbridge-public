@@ -28,6 +28,7 @@ class PolicyTests(unittest.TestCase):
                 self.assertFalse(any(standing_permission(scope) for scope in SCOPES))
                 save_permissions(CloudPermissions(dictation_openai=True))
                 self.assertTrue(standing_permission("dictation_openai"))
+                self.assertFalse(standing_permission("dictation_groq"))
                 self.assertFalse(standing_permission("vision_openai"))
                 self.assertFalse(standing_permission("local"))
                 save_permissions(CloudPermissions())
@@ -46,7 +47,9 @@ class PolicyTests(unittest.TestCase):
     def test_dictation_standing_permission_skips_modal(self):
         with patch("voxbridge.app.standing_permission", return_value=True) as checker:
             with patch("voxbridge.app.QMessageBox") as dialog:
-                self.assertTrue(VoxBridge._approve_dictation(object()))
+                from types import SimpleNamespace
+                from voxbridge.config import Settings
+                self.assertTrue(VoxBridge._approve_dictation(SimpleNamespace(settings=Settings())))
                 dialog.assert_not_called()
             checker.assert_called_once_with("dictation_openai")
 

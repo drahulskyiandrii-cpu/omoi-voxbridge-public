@@ -103,3 +103,29 @@ class DictationPrivacyTests(unittest.TestCase):
             stream.close.assert_called_once()
             self.assertEqual(len(mic._buffer), 0)
             self.assertIsNone(mic._stream)
+
+
+    def test_groq_decline_and_worker_route(self):
+        app,_=self.fixture(False)
+        app.settings.stt_backend="groq_cloud"
+        complete_microphone_stop(app)
+        app.executor.submit.assert_not_called()
+        app,_=self.fixture(True)
+        app.settings.stt_backend="groq_cloud"
+        complete_microphone_stop(app)
+        provider=Mock()
+        provider.transcribe.return_value="Synthetic"
+        with patch("voxbridge.app.GroqFileSTT",return_value=provider), patch("voxbridge.app.OpenAIFileSTT") as other:
+            self.assertEqual(app.executor.submit.call_args.args[0](),"Synthetic")
+            other.assert_not_called()
+            provider.close.assert_called_once()
+
+    def test_groq_permission_is_not_openai_permission(self):
+        app,_=self.fixture()
+        app.settings.stt_backend="groq_cloud"
+        with patch("voxbridge.app.standing_permission",side_effect=lambda scope:scope=="dictation_openai") as permission, patch("voxbridge.app.QMessageBox") as dialog:
+            dialog.return_value.exec.return_value=dialog.No
+            self.assertFalse(VoxBridge._approve_dictation(app))
+            permission.assert_called_once_with("dictation_groq")
+            self.assertIn("Groq",dialog.return_value.setText.call_args.args[0])
+            self.assertNotIn("OpenAI",dialog.return_value.setText.call_args.args[0])

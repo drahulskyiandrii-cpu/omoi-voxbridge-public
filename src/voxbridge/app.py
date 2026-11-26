@@ -25,7 +25,7 @@ from .vision_ui import VisionDialog
 from .captions_core import CaptionCoordinator
 from .captions_overlay import CaptionsOverlay, populate_synthetic_demo
 from .live_captions_ui import LiveCaptionsDialog
-from .config import load_settings, save_settings
+from .config import CLOUD_STT_BACKENDS, load_settings, save_settings
 from .cloud_permissions import standing_permission
 from .cloud_permissions_ui import CloudPermissionsDialog
 from .caption_preferences import load_caption_preferences, save_caption_preferences
@@ -39,7 +39,7 @@ from .stt_process import stt_block_reason, STT_CLEANUP_FAILED
 from .long_dictation import LongDictationTurn, ChunkedRecording, IncompleteDictation
 from .cuda_warm import WarmCudaController
 from .dictation_quality import inspect_transcript, MAX_RECORD_TEXT, MAX_SEGMENT_TEXT
-from .cloud_providers import OpenAIFileSTT, close_provider, PROVIDER_CLEANUP_FAILED
+from .cloud_providers import OpenAIFileSTT, GroqFileSTT, close_provider, PROVIDER_CLEANUP_FAILED
 from .selection_controller import SelectionController
 from .selection import SelectionFailure, capture_target, capture_readable_selection
 from .copied_text import capture_copy_target, capture_copied_text
@@ -84,7 +84,7 @@ class VoxBridge(QObject):
         self.active_backend = None
         # A saved local engine choice authorizes manual dictation only.
         # Startup never loads a model; CUDA still checks free VRAM at launch.
-        self._local_stt_armed = self.settings.stt_backend != "openai_cloud"
+        self._local_stt_armed = self.settings.stt_backend not in CLOUD_STT_BACKENDS
         self._partial_turn = None
         self._dictation_worker_generation = None
         self._stt_cleanup_failed = False
@@ -415,7 +415,8 @@ class VoxBridge(QObject):
             selection += " / busy"
         # Never display API keys, inspect audio devices, or test external services.
         configured = [label for label, name in (
-            ("OpenAI", "OPENAI_API_KEY"), ("Cartesia", "CARTESIA_API_KEY"),
+            ("OpenAI", "OPENAI_API_KEY"), ("Groq", "GROQ_API_KEY"),
+            ("Cartesia", "CARTESIA_API_KEY"),
             ("Anthropic", "ANTHROPIC_API_KEY")) if os.environ.get(name)]
         active = "Aktiv / Активно"
         idle = "Bereit / Готово"
@@ -530,7 +531,7 @@ class VoxBridge(QObject):
             self.notify("Während der Aufnahme kann die Engine nicht gewechselt werden.")
             self._refresh_menu()
             return
-        if mode not in ("openai_cloud", "mini_cpu", "mini_worker"):
+        if mode not in CLOUD_STT_BACKENDS | {"mini_cpu", "mini_worker"}:
             self.notify("INVALID_STT_ENGINE")
             self._refresh_menu()
             return
@@ -549,7 +550,7 @@ class VoxBridge(QObject):
         if mode != "mini_worker" and getattr(self, "cuda_warm", None) is not None:
             self.cuda_warm.deactivate()
         self.settings = replace(self.settings, stt_backend=updated.stt_backend)
-        self._local_stt_armed = mode != "openai_cloud"
+        self._local_stt_armed = mode not in CLOUD_STT_BACKENDS
         self._refresh_menu()
         self.notify("STT gespeichert / Saved: " + mode + " — " + self.settings.hotkey)
 
@@ -734,13 +735,14 @@ class VoxBridge(QObject):
 
     def _approve_dictation(self) -> bool:
         """Standing opt-in or fresh approval for this recording."""
-        if standing_permission("dictation_openai"):
+        provider = "Groq" if self.settings.stt_backend == "groq_cloud" else "OpenAI"
+        if standing_permission("dictation_groq" if provider == "Groq" else "dictation_openai"):
             return True
         dialog = QMessageBox()
         dialog.setWindowTitle("OMOI VoxBridge - Cloud STT")
         dialog.setText(
-            "Diese Mikrofonaufnahme an OpenAI zur Transkription senden? "
-            "Kosten sind möglich. / Отправить эту запись в OpenAI? Возможна оплата."
+            f"Diese Mikrofonaufnahme an {provider} zur Transkription senden? "
+            f"Kosten sind möglich. / Отправить эту запись в {provider}? Возможна оплата."
         )
         if getattr(self.settings, "max_record_seconds", 25) > MAX_SEGMENT_SECONDS:
             dialog.setInformativeText("Lange Aufnahme: mehrere Anfragen möglich. / Длинная запись: возможны несколько запросов.")
@@ -798,7 +800,7 @@ class VoxBridge(QObject):
                     or getattr(self, "_edit_worker_generation", None) is not None):
                 self.notify("Vorherige Cloud-Anfrage läuft noch; Diktieren gesperrt.")
                 return
-            if self.settings.stt_backend != "openai_cloud" and not getattr(self, "_local_stt_armed", False):
+            if self.settings.stt_backend not in CLOUD_STT_BACKENDS and not getattr(self, "_local_stt_armed", False):
                 self.notify("LOCAL_STT_NOT_CONFIGURED")
                 return
             if hwnd <= 0:
@@ -1037,10 +1039,10 @@ class VoxBridge(QObject):
             return
         settings = self.settings
         self.status.hide()
-        if self._shutting_down or (settings.stt_backend != "openai_cloud" and not getattr(self, "_local_stt_armed", False)):
+        if self._shutting_down or (settings.stt_backend not in CLOUD_STT_BACKENDS and not getattr(self, "_local_stt_armed", False)):
             self.session.finish(snap.generation)
             return
-        if settings.stt_backend == "openai_cloud" and not self._approve_dictation():
+        if settings.stt_backend in CLOUD_STT_BACKENDS and not self._approve_dictation():
             self.session.finish(snap.generation)
             self.notify("Aufnahme verworfen; kein Cloud-Upload.")
             return
@@ -1073,6 +1075,8 @@ class VoxBridge(QObject):
             long_mode = getattr(settings, "max_record_seconds", 25) > MAX_SEGMENT_SECONDS
             if settings.stt_backend == "openai_cloud":
                 backend = OpenAIFileSTT()
+            elif settings.stt_backend == "groq_cloud":
+                backend = GroqFileSTT()
             elif not getattr(self, "_local_stt_armed", False):
                 raise SpeechFailure("LOCAL_MODE_NOT_AUTHORIZED")
             elif settings.stt_backend == "shared":
