@@ -164,6 +164,13 @@ def main(argv=None):
         source = root / "source"
         source.mkdir()
         shutil.copy2(input_root / "pyproject.toml", source)
+        license_path = input_root / "LICENSE"
+        if not license_path.is_file():
+            license_path = input_root / "distribution" / "LICENSE"
+        if license_path.is_file():
+            shutil.copy2(license_path, source / "LICENSE")
+        elif args.source:
+            raise RuntimeError("SOURCE_LICENSE_MISSING")
         shutil.copytree(input_root / "src", source / "src",
                         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info"))
         wheel_dir = root / "wheel"
@@ -179,6 +186,10 @@ def main(argv=None):
             raise RuntimeError("WHEEL_EXPECTED_SINGLE_ARTIFACT")
         with zipfile.ZipFile(wheels[0]) as archive:
             names = archive.namelist()
+            if license_path.is_file():
+                license_names = [n for n in names if n.endswith("/LICENSE")]
+                if len(license_names) != 1 or archive.read(license_names[0]) != license_path.read_bytes():
+                    raise RuntimeError("WHEEL_LICENSE_MISSING_OR_DIFFERENT")
             assert "voxbridge/app.py" in names
             assert "voxbridge/openvino_worker.mjs" in names
             assert "voxbridge/windows_ocr.ps1" in names

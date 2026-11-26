@@ -1,5 +1,5 @@
 {
-  "commit": "6ccb00ebefee09b13708c404200692872d9bdbba",
+  "commit": "f644e5d045682624a74d4fd7fd178dfb0d1383cd",
   "files": {
     ".gitignore": "90a4e21f989851cb86afd86008cc2428aee41e82cc143c3b5d97f33f11cff673",
     "AGENTS.md": "a29cbf74c8f752978992b1517e1e66233d1706c130dc16092f5f7625731a4483",
@@ -17,10 +17,10 @@
     "docs/DATEIEN.md": "966f366c0785f44f86fdd189bdc8a30e1e9dbad82f830b990cd29e7e8fc3d23e",
     "docs/INSTALLATION.md": "cb372a2d6231903192540d5943bf434a08deafbffbb897b9fbb4b6f383ca5025",
     "docs/PROJEKTVORSTELLUNG.md": "d057f6c35946e524fbba3c229e48c60fcdcd49e019c19ec8b11c467ba39b6009",
-    "docs/TESTS.md": "c27b9b8dc9dee15391854e048dde1dade3ddda1e19dacfe2c8356493baab0f9f",
+    "docs/TESTS.md": "ca4fd6e162892fbfc3fc165776b5fdbd53a5a9151a8b6d7529f8cc2ddfd7cb7c",
     "pyproject.toml": "439be03223779f84e1f3ac018bfd62d6f9eded304a4c9a7119ee9f0176f5dc87",
     "scripts/check_hotkey_lifecycle.py": "dc8672ac36ebc3106ff1e7e21bac131eaf82339f413ea8b94d60a2fc2ae7f530",
-    "scripts/check_wheel.py": "4376c5454cf053c838ed825ddae4e612f84813965bd31a177c4782180bfdf77e",
+    "scripts/check_wheel.py": "61b8d642473b009c43d13002e8e0c386b7c756dff756a90aa6930916535615df",
     "scripts/create_shortcuts.ps1": "b8380389dd7198f95ccd39fd3d19c1cfa06b7beb4815792a7db306e27c93b9e4",
     "scripts/demo_captions.py": "beba82502494f6ca6737fffcb03087e99ed4593b4767a7143a03f3a433b9f15c",
     "scripts/install-dev.ps1": "9e194a3062f8dfa9156bea64b9ff77f308882c1861a3e19e1bcdf26e5e56b0c4",
