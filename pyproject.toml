@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omoi-voxbridge"
+version = "0.1.0"
+description = "Standalone Windows voice bridge with opt-in cloud and future local captions"
+requires-python = ">=3.11"
+dependencies = [
+    "PySide6-Addons>=6.8,<7",
+    "sounddevice>=0.5,<1",
+    "comtypes>=1.4,<2; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=2,<3"]
+selection = ["comtypes>=1.4,<2; sys_platform == 'win32'"]
+cloud = ["openai>=2,<3", "cartesia>=3,<5", "httpx>=0.27,<1"]
+captions = ["numpy>=1.26,<3", "soundcard>=0.4,<1", "websockets>=15,<18"]
+
+[project.scripts]
+voxbridge = "voxbridge.app:main"
+voxbridge-standalone = "voxbridge.app:main_standalone"
+voxbridge-doctor = "voxbridge.diagnostics:main"
+voxbridge-mcp = "voxbridge.mcp_stdio:main"
+
+[tool.setuptools.package-data]
+voxbridge = ["*.mjs", "*.ps1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

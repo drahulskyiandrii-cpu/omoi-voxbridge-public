@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+dist/
+build/
+*.egg-info/
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Do not commit model weights, private audio/text, logs, local configs
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.db
+*.sqlite*
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.srt
+*.vtt
+*.jsonl
+logs/
+models/
+weights/
+cache/
+local-data/
+benchmarks/results/
+config.local.json
+
+.venv-mt-lab/
