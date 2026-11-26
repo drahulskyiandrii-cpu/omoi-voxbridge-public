@@ -10,7 +10,7 @@ import shutil
 import xml.etree.ElementTree as ET
 
 SCRIPTS=("install_standalone.py","sandbox_acceptance.ps1","smoke_app_offscreen.py",
-         "smoke_captions_mock.py","check_hotkey_lifecycle.py")
+         "smoke_captions_mock.py","check_hotkey_lifecycle.py","demo_captions.py")
 PYTHON_INSTALLER="python-3.11.9-amd64.exe"  # historical qualification baseline
 PYTHON_NUGET="python.3.11.9.nupkg"
 WHEEL="omoi_voxbridge-0.1.0-py3-none-any.whl"

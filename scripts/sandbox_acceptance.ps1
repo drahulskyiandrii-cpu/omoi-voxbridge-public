@@ -60,14 +60,15 @@ assert Path(voxbridge.__file__).resolve().is_relative_to(Path(sys.prefix).resolv
 for module in ("soundcard", "comtypes"):
     subprocess.run([sys.executable, "-I", "-c", "import "+module], check=True, timeout=30)
 print("SANDBOX_RUNTIME_IMPORTS_PASS", QtCore.qVersion(), flush=True)
-for script in ("smoke_app_offscreen.py","smoke_captions_mock.py","check_hotkey_lifecycle.py"):
-    args = ["--register-test-hotkey"] if script.startswith("check_hotkey") else []
+for script in ("smoke_app_offscreen.py","smoke_captions_mock.py","check_hotkey_lifecycle.py","demo_captions.py"):
+    args = ["--register-test-hotkey"] if script.startswith("check_hotkey") else ["--self-test"] if script=="demo_captions.py" else []
     subprocess.run([sys.executable,"-I",str(Path(r"C:\VBInput")/script),*args],check=True,timeout=60)
 print("SANDBOX_NATIVE_AND_MOCK_CHECKS_PASS",flush=True)
 '@ | Set-Content -Path $verify -Encoding ASCII
     $check = Start-Process -FilePath $installed -ArgumentList @('-I', ('"'+$verify+'"')) -RedirectStandardOutput "$outputRoot\checks.stdout.txt" -RedirectStandardError "$outputRoot\checks.stderr.txt" -PassThru
+    # Retain the Windows process handle so ExitCode remains readable after exit.
+    $null = $check.Handle
     if (-not $check.WaitForExit(240000)) { $check.Kill(); throw 'Runtime checks timeout' }
-    $check.Refresh()
     if ($check.ExitCode -ne 0 -or -not (Select-String -Path "$outputRoot\checks.stdout.txt" -SimpleMatch 'SANDBOX_NATIVE_AND_MOCK_CHECKS_PASS' -Quiet)) { throw 'Runtime checks failed; see logs' }
     # No recording, model loading or paid API access. Actual native GUI test is separate.
     Write-Output 'SANDBOX_ACCEPTANCE_PASS'
