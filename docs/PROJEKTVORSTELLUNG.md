@@ -26,8 +26,8 @@ Die Anwendung lässt sich unabhängig installieren. Automatisierte Tests und ein
 
 ## Reproduzierbare Vorführung ohne Internet
 
-- Diagnose: `.\.venv\Scripts\voxbridge-doctor.exe`
-- Untertitel: `.\.venv\Scripts\python.exe scripts\demo_captions.py`
+- Diagnose: `Doctor.cmd`
+- Untertitel: `Demo-Untertitel.cmd`
 - Tests: `.\.venv\Scripts\python.exe scripts\smoke_captions_mock.py`
 - Optional: Quellcode von `src/voxbridge/session.py` öffnen und `begin`, `advance`, `cancel` erklären.
 

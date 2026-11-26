@@ -23,7 +23,7 @@ Voraussetzungen: Windows 11, Python 3.11 (64 Bit).
 | Datei | Funktion |
 | --- | --- |
 | `Setup-VoxBridge.cmd` | Einmalig Python-Abhängigkeiten installieren |
-| `Start-VoxBridge.cmd` | Anwendung mit Kontrollzentrum starten |
+| `Start-VoxBridge.cmd` | Anwendung im Infobereich starten |
 | `Demo-Untertitel.cmd` | Offline-Beispiel für die Präsentation anzeigen |
 | `Doctor.cmd` | Voraussetzungen prüfen |
 
@@ -37,8 +37,9 @@ sind in [Installation](docs/INSTALLATION.md) beschrieben.
 Standard-Diktat: `Ctrl+Alt+Space` startet und beendet die Aufnahme.
 Modell, Mikrofon, Sprache und Hotkeys sind konfigurierbar. Cloud-Aufrufe
 benötigen ausdrückliche Freigaben. API-Schlüssel werden nur zur Laufzeit aus
-Umgebungsvariablen gelesen. Das Kontrollzentrum öffnet sich beim unabhängigen
-Start; das Tray-Symbol bleibt auch bei geschlossenem Fenster verfügbar.
+Umgebungsvariablen gelesen. Die Anwendung startet im Infobereich (Tray). Ein Doppelklick auf das Symbol
+öffnet das Kontrollzentrum. Das Schließkreuz blendet das Fenster aus.
+Nur Beenden im Tray-Menü beendet die Anwendung nach der Ressourcenfreigabe.
 
 ## Offline-Demonstration
 

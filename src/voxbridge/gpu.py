@@ -36,7 +36,8 @@ def snapshot() -> GpuSnapshot:
     try:
         r = subprocess.run(["nvidia-smi", "--query-gpu=memory.total,memory.used,utilization.gpu",
                             "--format=csv,noheader,nounits"], check=True,
-                            capture_output=True, text=True, timeout=3)
+                            capture_output=True, text=True, timeout=3,
+                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         raise GpuBusy("GPU_STATUS_UNAVAILABLE") from None
     return parse_snapshot(r.stdout)

@@ -20,7 +20,7 @@ Die Tests verwenden synthetische Daten und nachgebildete Schnittstellen. Sie sta
 | Prüfung | Stand |
 | --- | --- |
 | Offline-Regression | Automatisierter Test |
-| Start, Dialoge, Abbruch und Beenden | Qt-Offscreen-Smoke |
+| Start, Dialoge, Abbruch und Beenden | Qt-Offscreen-Smoke; Tray-Start, Fenster ausblenden, Beenden und verzögerte Freigabe |
 | Untertitel und Übersetzungsaufträge | Mock- und Protokolltests |
 | Unabhängige Installation aller Python-Abhängigkeiten | Offline-Wheelhouse, geprüft auf Host und in Windows Sandbox |
 | Native Hotkey-Registrierung, Konflikt, Freigabe | In Windows Sandbox geprüft |

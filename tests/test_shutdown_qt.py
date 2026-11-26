@@ -81,17 +81,17 @@ class ShutdownTests(unittest.TestCase):
         finally:
             release.set()
 
-    def test_exit_timeout_is_retryable_and_never_forces_quit(self):
+    def test_exit_timeout_keeps_polling_and_never_forces_quit(self):
         bridge = self.bridge
         bridge._dictation_worker_generation = 1
         bridge.request_exit()
         bridge._exit_deadline = time.monotonic()-1
         bridge._poll_exit()
         self.quit.assert_not_called()
-        self.assertFalse(bridge._exit_timer.isActive())
-        self.assertIn("SHUTDOWN_CLEANUP_PENDING", bridge.tray.toolTip())
+        self.assertTrue(bridge._exit_timer.isActive())
+        self.assertIn("SHUTDOWN_CLEANUP_PENDING: STT", bridge.tray.toolTip())
         bridge._dictation_worker_generation = None
-        bridge.request_exit()
+        bridge._poll_exit()
         self.quit.assert_called_once()
 
     def test_shared_voice_selector_and_cancelled_metadata_keep_exit_pending(self):
@@ -119,3 +119,30 @@ class ShutdownTests(unittest.TestCase):
         bridge.tts_dialog._output_cleanup_failed = True
         bridge.request_exit()
         self.quit.assert_called_once()
+
+    def test_main_window_close_hides_and_tray_exit_quits(self):
+        bridge = self.bridge
+        bridge.open_control_center()
+        dlg = bridge.control_center
+        dlg.close()
+        self.app.processEvents()
+        self.assertFalse(dlg.isVisible())
+        self.assertFalse(bridge._shutting_down)
+        self.quit.assert_not_called()
+        bridge.open_control_center()
+        self.assertTrue(dlg.isVisible())
+        bridge.request_exit()
+        end = time.monotonic()+3
+        while not self.quit.called and time.monotonic()<end:
+            self.app.processEvents()
+            time.sleep(.01)
+        self.quit.assert_called_once()
+        self.assertTrue(bridge._shutting_down)
+
+    def test_shutdown_cancels_queued_tts_prewarm(self):
+        bridge = self.bridge
+        bridge.open_tts()
+        dlg = bridge.tts_dialog
+        dlg._prewarm_requested = True
+        bridge.request_exit()
+        self.assertFalse(dlg._prewarm_requested)

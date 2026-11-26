@@ -119,7 +119,7 @@ class StandalonePathsTests(unittest.TestCase):
                 self.assertEqual(main_standalone(), 0)
                 self.assertEqual(standalone_root(), Path(tmp) / "OMOI-VoxBridge-Standalone" / "local-runtime")
                 self.assertEqual(os.environ["VOXBRIDGE_PROFILE_ROOT"],str(Path(tmp)/"OMOI-VoxBridge-Standalone"))
-                main.assert_called_once_with(show_control_center=True)
+                main.assert_called_once_with(standalone=True)
             self.assertEqual(list(Path(tmp).iterdir()), [])
 
     def test_standalone_launcher_respects_explicit_profile_and_runtime(self):
@@ -141,15 +141,15 @@ class StandalonePathsTests(unittest.TestCase):
                             "VOXBRIDGE_QWEN_WORKER": str(worker)}, clear=True):
                 self.assertEqual(runtime_files()[1], worker)
 
-    def test_standalone_main_shows_center_and_releases_lock(self):
+    def test_standalone_main_tray_only_and_releases_lock(self):
         from voxbridge.app import main
         with tempfile.TemporaryDirectory() as tmp:
             with patch.dict(os.environ,{"VOXBRIDGE_PROFILE_ROOT":tmp}), \
                     patch("voxbridge.app.QApplication") as app, \
                     patch("voxbridge.app.VoxBridge") as bridge:
                 app.return_value.exec.return_value=0
-                self.assertEqual(main(show_control_center=True),0)
-                bridge.return_value.open_control_center.assert_called_once_with()
+                self.assertEqual(main(standalone=True),0)
+                bridge.return_value.open_control_center.assert_not_called()
                 self.assertFalse((Path(tmp)/"instance.lock").exists())
 
     def test_standalone_second_instance_does_not_start(self):
@@ -163,7 +163,7 @@ class StandalonePathsTests(unittest.TestCase):
                         patch("voxbridge.app.QApplication"), \
                         patch("voxbridge.app.VoxBridge") as bridge, \
                         patch("voxbridge.app.QMessageBox.information") as notice:
-                    self.assertEqual(main(show_control_center=True),2)
+                    self.assertEqual(main(standalone=True),2)
                     bridge.assert_not_called()
                     notice.assert_called_once()
                 self.assertTrue(lock.isLocked())

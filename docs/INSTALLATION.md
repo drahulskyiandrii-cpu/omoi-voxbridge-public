@@ -38,8 +38,12 @@ OMOI VoxBridge, Diagnose und optional Praesentation auf dem Desktop.
 Abweichende vorhandene Verknüpfungen werden nicht überschrieben.
 Es startet keine Anwendung und aktiviert keinen Autostart.
 Der unabhängige Start verwendet standardmäßig das separate Profil
-OMOI-VoxBridge-Standalone und öffnet das Kontrollzentrum. Eine Sperrdatei verhindert mehrere
-unabhängige Instanzen mit demselben Profil.
+OMOI-VoxBridge-Standalone und startet im Infobereich. Eine Sperrdatei
+verhindert mehrere unabhängige Instanzen mit demselben Profil.
+Doppelklick auf das Tray-Symbol öffnet das Kontrollzentrum; das Schließkreuz
+blendet es aus. Beenden im Tray-Menü stoppt die Anwendung. Bei verzögerter
+Freigabe zeigt das Tray die wartenden Komponenten an und beendet sich
+nach deren Freigabe automatisch.
 
 ## Windows Sandbox
 

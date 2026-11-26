@@ -280,6 +280,7 @@ class CloudTTSDialog(PrivateDialog):
         self._state_changed()
 
     def shutdown_local(self):
+        self._prewarm_requested = False
         if self._cancel is not None:
             self._cancel.set()
         if self._local_used or self._local_cleanup_failed:

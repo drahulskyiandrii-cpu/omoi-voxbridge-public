@@ -102,6 +102,7 @@ class VoxBridge(QObject):
         self._shutting_down = False
         self._exit_requested = False
         self._exit_deadline = 0.0
+        self._exit_timeout_reported = False
         self._exit_timer = QTimer(self)
         self._exit_timer.setInterval(100)
         self._exit_timer.timeout.connect(self._poll_exit)
@@ -329,7 +330,7 @@ class VoxBridge(QObject):
             return item
 
         if self._shutting_down:
-            action(menu, "Beenden erneut pruefen / Retry exit", self.request_exit)
+            action(menu, "Beenden: Ressourcenfreigabe / Exit cleanup", self.request_exit)
             return menu
 
         action(menu, "Kontrollzentrum / Центр управления…", self.open_control_center)
@@ -1307,34 +1308,42 @@ class VoxBridge(QObject):
         self.status.hide()
         self.notify("Abgebrochen; alte Ergebnisse werden verworfen.")
 
+    def _exit_blockers(self):
+        """Stable component names only; never inspect or log user content."""
+        checks = [
+            ("LLM", getattr(getattr(self, "local_llm", None), "pending", False)),
+            ("STT", self._dictation_worker_generation is not None),
+            ("Input", self._edit_worker_generation is not None),
+            ("Microphone", self.mic.pending),
+            ("CUDA", self.cuda_warm.status()[0] in ("loading", "closing")),
+        ]
+        checks.extend((name, controller.shutdown_pending) for name, controller in
+                      (("Selection", self.selection), ("Read selection", self.read_selection),
+                       ("Read clipboard", self.read_copy)))
+        checks.append(("Hotkeys", any(listener.running is True for listener in
+                                      (self.hotkeys, *self._region_hotkeys.values()))))
+        checks.extend((name, dialog is not None and dialog._busy) for name, dialog in
+                      (("Analysis", self.analysis_dialog), ("Vision", self.vision_dialog),
+                       ("Captions", self.live_captions_dialog)))
+        checks.extend((
+            ("TTS", self.tts_dialog is not None and self.tts_dialog.shutdown_pending),
+            ("Voices", self.voice_dialog is not None and self.voice_dialog._worker_generation is not None),
+            ("Audio devices", self.live_captions_dialog is not None and self.live_captions_dialog._refreshing),
+        ))
+        return tuple(name for name, pending in checks if pending)
+
     def _exit_pending(self):
-        """Poll actual outstanding work; never join native workers on Qt."""
-        if (getattr(getattr(self, "local_llm", None), "pending", False)
-                or self._dictation_worker_generation is not None
-                or self._edit_worker_generation is not None
-                or self.mic.pending
-                or self.cuda_warm.status()[0] in ("loading", "closing")):
-            return True
-        if any(controller.shutdown_pending for controller in
-               (self.selection, self.read_selection, self.read_copy)):
-            return True
-        if any(listener.running is True for listener in
-               (self.hotkeys, *self._region_hotkeys.values())):
-            return True
-        if any(dialog is not None and dialog._busy for dialog in
-               (self.analysis_dialog, self.vision_dialog, self.live_captions_dialog)):
-            return True
-        return (self.tts_dialog is not None and self.tts_dialog.shutdown_pending
-                or self.voice_dialog is not None and self.voice_dialog._worker_generation is not None
-                or self.live_captions_dialog is not None and self.live_captions_dialog._refreshing)
+        return bool(self._exit_blockers())
 
     @Slot()
     def request_exit(self, checked=False):
         """Normal tray exit: stop work, then keep Qt alive for completion signals."""
         del checked
         if self._exit_timer.isActive():
+            self._poll_exit()
             return
         self._exit_requested = True
+        self._exit_timeout_reported = False
         self.shutdown()
         self._exit_deadline = time.monotonic() + 15
         self._exit_timer.start()
@@ -1342,19 +1351,21 @@ class VoxBridge(QObject):
 
     @Slot()
     def _poll_exit(self):
-        if not self._exit_pending():
+        blockers = self._exit_blockers()
+        if not blockers:
             self._exit_timer.stop()
             self.tray.hide()
             self.app.quit()
         elif time.monotonic() >= self._exit_deadline:
-            # Do not force an exit while a worker may own audio or clipboard.
-            # A stalled native driver may require OS intervention. The tray
-            # remains accessible for an explicit retry, with other actions disabled.
-            self._exit_timer.stop()
-            self.tray.setToolTip("OMOI VoxBridge: SHUTDOWN_CLEANUP_PENDING")
-            self.notify("SHUTDOWN_CLEANUP_PENDING - Retry exit")
+            # Keep polling: late worker completion must still close the app.
+            # Never kill another application's borrowed service.
+            message = "SHUTDOWN_CLEANUP_PENDING: " + ", ".join(blockers)
+            self.tray.setToolTip("OMOI VoxBridge: " + message)
+            if not self._exit_timeout_reported:
+                self._exit_timeout_reported = True
+                self.notify(message)
         else:
-            self.tray.setToolTip("OMOI VoxBridge: stopping workers")
+            self.tray.setToolTip("OMOI VoxBridge: stopping " + ", ".join(blockers))
 
     def shutdown(self):
         if self._shutting_down:
@@ -1370,7 +1381,7 @@ class VoxBridge(QObject):
             self.read_copy.disable()
         self.selection.disable()
         if self.tts_dialog is not None:
-            self.tts_dialog.shutdown_local()
+            self.tts_dialog.stop_all()
         for dialog in (self.control_center, self.live_captions_dialog, self.caption_demo_overlay,
                        self.analysis_dialog, self.vision_dialog,
                        self.tts_dialog, self.voice_dialog):
@@ -1389,7 +1400,7 @@ class VoxBridge(QObject):
             self.tray.hide()
 
 
-def main(*, show_control_center=False) -> int:
+def main(*, standalone=False) -> int:
     if os.name != "nt":
         raise SystemExit("VoxBridge requires Windows")
     app = QApplication([])
@@ -1397,7 +1408,7 @@ def main(*, show_control_center=False) -> int:
     lock = None
     bridge = None
     try:
-        if show_control_center:
+        if standalone:
             from .config import config_path
             profile = config_path().parent
             profile.mkdir(parents=True, exist_ok=True)
@@ -1409,8 +1420,6 @@ def main(*, show_control_center=False) -> int:
                     "Bitte das Tray-Symbol bzw. die Diagnose verwenden.")
                 return 2
         bridge = VoxBridge(app)
-        if show_control_center:
-            bridge.open_control_center()
         return app.exec()
     except Exception as exc:
         if bridge is not None:
@@ -1423,7 +1432,7 @@ def main(*, show_control_center=False) -> int:
 
 
 def main_standalone() -> int:
-    """Installed launcher: independent profile/runtime and visible control centre."""
+    """Installed launcher: independent profile/runtime; tray only."""
     from pathlib import Path
     from .config import config_path
     root = Path(os.environ.get("LOCALAPPDATA") or Path.home())
@@ -1435,7 +1444,7 @@ def main_standalone() -> int:
         app = QApplication([])
         QMessageBox.critical(None, "VoxBridge", "PROFILE_ROOT_INVALID")
         return 2
-    return main(show_control_center=True)
+    return main(standalone=True)
 
 
 if __name__ == "__main__":

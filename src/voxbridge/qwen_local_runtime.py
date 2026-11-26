@@ -87,7 +87,8 @@ def immutable_worker(worker, cache, *, allow_git_fallback=True):
             data = subprocess.run(
                 ["git", "-C", str(worker.parent.parent), "show",
                  PINNED_MINI_COMMIT + ":local-tts/qwen_server.py"],
-                check=True, capture_output=True, timeout=4).stdout
+                check=True, capture_output=True, timeout=4,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout
         except (OSError, subprocess.SubprocessError):
             raise LocalTTSFailure("QWEN_WORKER_CHANGED") from None
         digest = hashlib.sha256(data).hexdigest()
