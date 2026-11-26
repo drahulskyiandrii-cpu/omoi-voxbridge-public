@@ -17,7 +17,7 @@ OMOI-VoxBridge/
   tests/                Automatische Tests
   scripts/              Installation, Start und Prüfungen
   docs/                 Dokumentation
-  AGENTS.md             Technische Arbeitsregeln
+  CONTRIBUTING.md       Entwicklungsregeln
   LICENSE               MIT-Lizenz
   LICENSE_STATUS.md     Lizenzumfang
   SECURITY.md           Sicherheit und Datenschutz
@@ -39,7 +39,7 @@ OMOI-VoxBridge/
 | `src/voxbridge/control_center.py` | Bedienoberfläche |
 | `src/voxbridge/captions_core.py` | Verwaltung der Untertitel |
 
-Für eine Code-Vorstellung genügen zunächst diese Dateien. Ein guter Ablauf: Start → Sitzungszustand → Audio → STT → geprüftes Zielfeld.
+Für den Einstieg in den Code eignen sich diese Dateien. Datenfluss: Start → Sitzungszustand → Audio → STT → geprüftes Zielfeld.
 
 ## 3. Wo liegen Einstellungen und Modelle?
 
@@ -69,6 +69,7 @@ Die Profildateien entstehen bei Bedarf. Das Verzeichnis `local-runtime` wird nic
 | --- | --- |
 | `scripts/install-dev.ps1` | Erstellt bzw. verwendet die projektbezogene .venv und installiert Abhängigkeiten. |
 | `scripts/start-dev.ps1` | Startet die Entwicklungsvariante. |
+| `scripts/create_shortcuts.ps1` | Erstellt Desktop-Verknüpfungen zur installierten Anwendung und Diagnose. |
 | `scripts/install_standalone.py` | Installiert ein geprüftes Wheel in einen neuen separaten Ordner. |
 | `scripts/demo_captions.py` | Zeigt Beispielsätze im Untertitel-Fenster, ohne API oder Modelle. |
 | `scripts/run_offline_tests.py` | Führt Regressionstests aus. |
@@ -81,7 +82,7 @@ Die Profildateien entstehen bei Bedarf. Das Verzeichnis `local-runtime` wird nic
 | `scripts/test_direct_input.py` | Einmaliger, ausdrücklich aktivierter Test der Texteingabe. |
 | `scripts/start_mcp_stdio.py` | Startet die explizite MCP-Textschnittstelle. |
 
-Weitere Informationen: [Installation](INSTALLATION.md), [Architektur](ARCHITEKTUR.md), [Projektvorstellung](PROJEKTVORSTELLUNG.md), [Tests](TESTS.md).
+Weitere Informationen: [Installation](INSTALLATION.md), [Architektur](ARCHITEKTUR.md), [Tests](TESTS.md).
 
 ## 5. Vollständige Karte des Programmcodes
 

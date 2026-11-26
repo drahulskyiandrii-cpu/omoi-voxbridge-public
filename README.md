@@ -24,7 +24,7 @@ Voraussetzungen: Windows 11, Python 3.11 (64 Bit).
 | --- | --- |
 | `Setup-VoxBridge.cmd` | Einmalig Python-Abhängigkeiten installieren |
 | `Start-VoxBridge.cmd` | Anwendung im Infobereich starten |
-| `Demo-Untertitel.cmd` | Offline-Beispiel für die Präsentation anzeigen |
+| `Demo-Untertitel.cmd` | Offline-Beispiel anzeigen |
 | `Doctor.cmd` | Voraussetzungen prüfen |
 
 Zuerst Setup, danach Start. Die Einrichtung aus dem Quellcode benötigt
@@ -93,10 +93,10 @@ Die Oberfläche bleibt von Inferenz und Gerätezugriff getrennt. Sitzungs-IDs ve
 | [Ordner und Dateien](docs/DATEIEN.md) | Einfache Pfade, Dateikarte und Konfigurationsordner |
 | [Architektur](docs/ARCHITEKTUR.md) | Module, Datenfluss und Windows-Schnittstellen |
 | [Installation](docs/INSTALLATION.md) | Wheel, lokale Laufzeiten, API-Konfiguration und Sandbox |
-| [Projektvorstellung](docs/PROJEKTVORSTELLUNG.md) | Ablauf einer Kurzpräsentation mit Offline-Demo |
 | [Prüfungen](docs/TESTS.md) | Reproduzierbare Tests, Abnahmestand und Grenzen |
 | [MIT-Lizenz](LICENSE) | Lizenz des enthaltenen Quellcodes |
 | [Lizenzumfang](LICENSE_STATUS.md) | Abgrenzung externer Komponenten |
+| [Mitwirken](CONTRIBUTING.md) | Entwicklungsregeln und Tests |
 | [Sicherheit](SECURITY.md) | Sicherheitsmeldungen und Datenschutz |
 | [Versionsverlauf](CHANGELOG.md) | Funktionsumfang der Vorschau |
 | [Abhängigkeiten](THIRD_PARTY_NOTICES.md) | Lizenzmetadaten externer Bibliotheken |

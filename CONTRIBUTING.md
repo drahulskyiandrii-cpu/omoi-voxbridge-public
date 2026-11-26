@@ -1,4 +1,4 @@
-# Engineering conventions
+# Contributing to OMOI VoxBridge
 
 Windows 11, Python 3.11 and PySide6. Keep modules focused, readable and
 independently testable. Document public interfaces in README.md.

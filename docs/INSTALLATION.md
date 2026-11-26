@@ -34,7 +34,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/create_shortcuts.ps1
 
 Optional mit -SourceDir und einem absoluten Pfad zur geprüften
 Quellcode-Fassung (mit SOURCE_MANIFEST.json). Das Skript erzeugt
-OMOI VoxBridge, Diagnose und optional Praesentation auf dem Desktop.
+OMOI VoxBridge, Diagnose und optional Quellcode auf dem Desktop.
 Abweichende vorhandene Verknüpfungen werden nicht überschrieben.
 Es startet keine Anwendung und aktiviert keinen Autostart.
 Der unabhängige Start verwendet standardmäßig das separate Profil

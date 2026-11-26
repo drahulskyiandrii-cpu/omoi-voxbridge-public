@@ -1,4 +1,4 @@
-"""Source and distribution presentation contract; no device or model I/O."""
+"""Source documentation and distribution contract; no device or model I/O."""
 import os
 from pathlib import Path
 import re
@@ -10,14 +10,21 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "distribution" if (ROOT / "distribution/README.md").is_file() else ROOT
 
 
-class PresentationAssetsTests(unittest.TestCase):
+class DocumentationTests(unittest.TestCase):
     def test_preview_license_and_public_docs(self):
         license_text = (DOCS / "LICENSE").read_text(encoding="utf-8")
         self.assertTrue(license_text.startswith("MIT License"))
         self.assertIn('THE SOFTWARE IS PROVIDED "AS IS"', license_text)
-        for name in ("SECURITY.md", "CHANGELOG.md", "LICENSE_STATUS.md"):
+        for name in ("SECURITY.md", "CHANGELOG.md", "LICENSE_STATUS.md", "CONTRIBUTING.md"):
             self.assertTrue((DOCS/name).is_file(), name)
         readme = (DOCS/"README.md").read_text(encoding="utf-8")
+        expected_docs = {"ARCHITEKTUR.md", "DATEIEN.md", "INSTALLATION.md", "TESTS.md"}
+        if DOCS == ROOT:
+            self.assertEqual({p.name for p in (DOCS/"docs").glob("*.md")}, expected_docs)
+        else:
+            import json
+            mapping = json.loads((DOCS/"source_manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual({Path(n).name for n in mapping if n.startswith("docs/")}, expected_docs)
         self.assertIn("0.1.0 Preview", readme)
         self.assertIn("](LICENSE)", readme)
 

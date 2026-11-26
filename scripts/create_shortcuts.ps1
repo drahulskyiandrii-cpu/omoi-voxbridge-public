@@ -26,7 +26,7 @@ $links = @(
 if ($SourceDir) {
     $SourceDir = LocalDirectory $SourceDir
     if (-not (Test-Path -LiteralPath (Join-Path $SourceDir 'SOURCE_MANIFEST.json') -PathType Leaf)) { throw 'Source manifest missing' }
-    $links += @{Name='OMOI VoxBridge - Praesentation.lnk';Target=$SourceDir;Work=$SourceDir;Icon='';Description='Clean source and presentation'}
+    $links += @{Name='OMOI VoxBridge - Quellcode.lnk';Target=$SourceDir;Work=$SourceDir;Icon='';Description='Source code'}
 }
 $shell = New-Object -ComObject WScript.Shell
 # Validate all existing links before creating any.
