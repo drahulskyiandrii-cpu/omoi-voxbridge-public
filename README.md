@@ -1,9 +1,12 @@
-# OMOI VoxBridge - private source review snapshot
+# OMOI VoxBridge
 
-**Development snapshot, not a public release.** Local Qwen and legacy STT
-asset provisioning and real Windows/GPU acceptance are not yet complete.
-No model weights, private voice files, API credentials or development history
-are included. Do not redistribute until the license and acceptance gates pass.
+Windows-Anwendung für Spracheingabe, Sprachausgabe, Live-Untertitel und
+KI-gestützte Analyse. Ein Lernprojekt im Bereich Fachinformatik für
+Systemintegration mit Python und PySide6.
+
+**Entwicklungsstand 0.1.0.** Modellgewichte, Sprachaufnahmen und API-Schlüssel
+sind nicht enthalten. Lokale Modelle und native Windows-Funktionen
+benötigen weitere Integrationsprüfungen.
 
 ## Zweck / Funktion
 
@@ -37,36 +40,37 @@ keine fremden Stimmen oder Gewichte ohne deren Nutzungsrechte.
 Qt wird mit passenden Addons, Essentials und shiboken6 installiert.
 Qt PDF und WebEngine sind für VoxBridge nicht erforderlich.
 
-## Unabhaengige Installation aus dem Wheel
+## Unabhängige Installation aus dem Wheel
 
-Voraussetzung: 64-Bit Python 3.11 auf Windows. Das gepruefte Wheel und
-dessen SHA256-Pruefsumme separat bereitstellen. Keine Administratorrechte,
+Voraussetzung: 64-Bit Python 3.11 auf Windows. Das geprüfte Wheel und
+dessen SHA256-Prüfsumme separat bereitstellen. Keine Administratorrechte,
 kein Autostart, kein Zugriff auf vorhandene Entwicklungsumgebungen.
 Standardziel: LocalAppData/Programs/OMOI-VoxBridge. Das Ziel darf noch
-nicht existieren; vorhandene Installationen werden nie ueberschrieben.
+nicht existieren; vorhandene Installationen werden nie überschrieben.
 
     py -3.11 -I scripts/install_standalone.py --wheel C:/Downloads/omoi_voxbridge-0.1.0-py3-none-any.whl --sha256 SHA256 --plan
 
-Nach Kontrolle denselben Befehl ohne --plan ausfuehren. Optional
---wheelhouse C:/Downloads/wheelhouse fuer eine vollstaendige lokale
-Wheelsammlung (keine Netzwerkabhaengigkeiten waehrend der Installation).
-Ohne wheelhouse werden Python-Abhaengigkeiten von PyPI bezogen.
+Nach Kontrolle denselben Befehl ohne --plan ausführen. Optional
+--wheelhouse C:/Downloads/wheelhouse für eine vollständige lokale
+Wheelsammlung (keine Netzwerkabhängigkeiten waehrend der Installation).
+Ohne wheelhouse werden Python-Abhängigkeiten von PyPI bezogen.
 Start-VoxBridge.cmd und Doctor.cmd liegen im neuen Installationsordner.
 Die beiden Startskripte verwenden ein separates Profil unter
 LocalAppData/OMOI-VoxBridge-Standalone. Die Entwicklungsprofile und
-bestehenden Berechtigungen werden nicht uebernommen oder veraendert. Zum Entfernen erst
+bestehenden Berechtigungen werden nicht übernommen oder verändert. Zum Entfernen erst
 VoxBridge normal beenden und dann nur den eigenen Installationsordner
-entfernen. Benutzerprofile und Modellordner nicht automatisch loeschen.
+entfernen. Benutzerprofile und Modellordner nicht automatisch löschen.
 Dies ist ein Python-basierter Installer, kein selbstenthaltendes EXE/MSI.
 
 Windows Sandbox: scripts/sandbox_acceptance.ps1 ist ein expliziter
-Test fuer eine frische VM, keine normale Installation. Die VM soll
+Test für eine frische VM, keine normale Installation. Die VM soll
 keinen Netzwerk-, GPU-, Mikrofon- oder Clipboard-Zugriff haben.
-Nur ein eigens vorbereiteter schreibgeschuetzter Eingabeordner und
+Nur ein eigens vorbereiteter schreibgeschützter Eingabeordner und
 ein separater Ergebnisordner werden eingebunden. Keine privaten
 Modelle, Anwendungsprofile oder Zugangsdaten freigeben.
 scripts/prepare_sandbox.py --help beschreibt die Vorbereitung aus einem
-lokalen, bereits geprueften Python-Installer und einem Wheelhouse.
+lokalen, signaturgeprüften Python-Installer oder PSF-NuGet-Paket und einem Wheelhouse.
+Mit --python-nupkg lässt sich die MSI-Installation in der Test-VM vermeiden.
 Die historische Sandbox-Basis Python 3.11.9 ist nur ein Teststand,
 keine Empfehlung zur Installation einer veralteten Python-Version.
 
@@ -117,29 +121,10 @@ Windows OCR verwendet installierte Windows-Sprachpakete. Lokale Dienste
 werden nur nach ausdrücklicher Konfiguration wiederverwendet; fremde Prozesse
 werden nicht beendet.
 
-## Installation aus einem Python-Wheel (privater Test)
-
-Das separat gebaute Wheel enthält nur das Python-Anwendungsprogramm.
-In einem neuen, eigenen Ordner installieren (Beispiel: PowerShell):
-
-```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install 'D:\Download\omoi_voxbridge-0.1.0-py3-none-any.whl[cloud,captions,mcp]'
-.\.venv\Scripts\voxbridge-doctor.exe
-.\.venv\Scripts\voxbridge-standalone.exe
-```
-
-Die Installation startet nichts automatisch. Zum Entfernen zuerst VoxBridge
-über das Tray-Menü beenden und danach nur den selbst erstellten
-Installationsordner entfernen. Einstellungen und lokale Modell-Assets
-bleiben separat erhalten. Keine bestehenden Python-Umgebungen löschen.
-Für ein Update ein neues Wheel in einer neuen Umgebung prüfen; die
-bisherige Installation bis zur Abnahme behalten.
-
 ## Struktur
 
 - `src/voxbridge/`: Anwendung, Qt-Dialoge, Einstellungen, Provider, Windows-Adapter.
-- `tests/`: ausgewählte Produktionsregressionen mit synthetischen Daten.
+- `tests/`: automatisierte Regressionstests mit synthetischen Daten.
 - `scripts/`: Installation, Start, Offline-Tests, Wheel-Prüfung.
 - `SOURCE_MANIFEST.json`: Commit und SHA-256 für alle exportierten Dateien.
 
@@ -155,7 +140,7 @@ Das Projekt demonstriert Windows-Systemintegration mit klar getrennten
 Schnittstellen. Der Controller koordiniert Hotkeys, Tray und Sitzungen.
 Die Provider implementieren die Inferenz. Eigene Worker werden kontrolliert
 beendet. Ein Fehler darf weder zu einer unerwarteten Eingabe in ein anderes
-Fenster noch zu einer unangekuendigten Cloud-Anfrage fuehren.
+Fenster noch zu einer unangekündigten Cloud-Anfrage fuehren.
 
     Windows hotkey / tray
       -> Application controller and session state
@@ -168,38 +153,35 @@ Fenster noch zu einer unangekuendigten Cloud-Anfrage fuehren.
 
 ## Funktions- und Abnahmestand
 
-| Funktion | Implementierung | Noch zu pruefen |
+| Funktion | Implementierung | Noch zu prüfen |
 | --- | --- | --- |
 | Diktat | OpenAI; Groq; OpenVINO CPU; Faster-Whisper CUDA | reale Zielanwendungen, GPU |
 | Vorlesen | Cartesia; separat qualifizierter Qwen-Worker | Audioausgabe, autonomer Qwen-Worker |
 | Analyse | OCR; OpenAI; lokale GGUF-Modelle; optional Anthropic | reale Bildschirmregion, lokale Modelle |
-| Live-Untertitel | OpenAI Realtime; Cartesia Ink Preview (experimentell); optional Cloud-Uebersetzung | WASAPI, Overlay, laengere Sitzungen |
+| Live-Untertitel | OpenAI Realtime; Cartesia Ink Preview (experimentell); optional Cloud-Übersetzung | WASAPI, Overlay, längere Sitzungen |
 | MCP | explizite stdio-Schnittstelle | externe Client-Abnahme |
-| Offline-Uebersetzung / Streaming-STT | nicht freigegeben | Qualitaets- und Laufzeittests |
+| Offline-Übersetzung / Streaming-STT | nicht freigegeben | Qualitäts- und Laufzeittests |
 
-OpenAI und Cartesia wurden mit synthetischen Eingaben auf tatsaechliche
-Erreichbarkeit geprueft. Das ist keine Garantie fuer zukuenftige Verfuegbarkeit,
-Kontingente oder Audioqualitaet. Andere Provider erfordern gesonderte Abnahme.
-Vor einem Aufruf muessen Zugangsdaten und die erforderliche Freigabe vorhanden
-sein. Cloud-Schluessel werden zur Laufzeit ueber Umgebungsvariablen gelesen
+OpenAI, Groq und Cartesia wurden mit synthetischen Eingaben geprüft. Das ist keine Garantie für zukuenftige Verfügbarkeit,
+Kontingente oder Audioqualität. Andere Provider erfordern gesonderte Abnahme.
+Vor einem Aufruf müssen Zugangsdaten und die erforderliche Freigabe vorhanden
+sein. Cloud-Schlüssel werden zur Laufzeit über Umgebungsvariablen gelesen
 (OPENAI_API_KEY, GROQ_API_KEY, CARTESIA_API_KEY, optional ANTHROPIC_API_KEY).
 Groq Whisper Large V3 verarbeitet abgeschlossene Aufnahmen, keine Live-Untertitel.
 Cartesia Ink Preview ist eine optionale experimentelle Live-STT-Schnittstelle.
-Sie nutzt eine eigene Freigabe fuer Systemaudio; OpenAI bleibt Standard.
-Bei aktivierter Cloud-Uebersetzung ist auch die OpenAI-Freigabe notwendig.
-Die Preview-Version kann sich serverseitig aendern. Keine automatische Ausweichroute.
-Die Groq-Freigabe ist getrennt von OpenAI. Kosten sind je nach Tarif moeglich.
+Sie nutzt eine eigene Freigabe für Systemaudio; OpenAI bleibt Standard.
+Bei aktivierter Cloud-Übersetzung ist auch die OpenAI-Freigabe notwendig.
+Die Preview-Version kann sich serverseitig ändern. Keine automatische Ausweichroute.
+Die Groq-Freigabe ist getrennt von OpenAI. Kosten sind je nach Tarif möglich.
 Nicht in Dateien oder Git speichern.
 
 ## Freigabekriterien
 
-Dieser private Quellcode-Stand enthaelt keine Forschungsmodelle, privaten
-Sprachdaten, Entwicklungsprotokolle oder Installationsumgebungen.
-Vor einer oeffentlichen Freigabe: Lizenz und Rechte bestaetigen; unabhaengige
+Der Quellcode enthält keine Modellgewichte, Sprachaufnahmen oder Zugangsdaten.
+Vor Version 1.0: Lizenz und Rechte klären; unabhängige
 Installation, reale Hotkeys und Zielanwendungen, Mikrofon, Systemaudio und
-Wiedergabe pruefen; lokale GPU- und CPU-Backends separat qualifizieren;
-bekannte Einschraenkungen dokumentieren. Bis dahin keine oeffentliche
-Veroeffentlichung und keine Freigabe als fertiges Installationspaket.
+Wiedergabe prüfen; lokale GPU- und CPU-Backends separat qualifizieren;
+bekannte Einschränkungen dokumentieren. Der aktuelle Stand ist keine freigegebene Endversion.
 
 ## Offline-Prüfung
 

@@ -89,6 +89,12 @@ class StandaloneInstallerTests(unittest.TestCase):
               "--wheelhouse",str(house),"--wheel-sha256",self.sha,"--target",str(target)]
         with patch.object(sys,"argv",args),contextlib.redirect_stdout(io.StringIO()):
             module.main()
+        target2=self.root/"sandbox-nuget"
+        nuget_args=[str(target2) if v==str(target) else "--python-nupkg" if v=="--python-installer" else v for v in args]
+        with patch.object(sys,"argv",nuget_args),contextlib.redirect_stdout(io.StringIO()):
+            module.main()
+        self.assertEqual((target2/"input"/module.PYTHON_NUGET).read_bytes(),python.read_bytes())
+        self.assertFalse((target2/"input"/module.PYTHON_INSTALLER).exists())
         config=ET.parse(target/"VoxBridge-test.wsb").getroot()
         for tag in ("VGpu","Networking","AudioInput","VideoInput","ClipboardRedirection","PrinterRedirection"):
             self.assertEqual(config.findtext(tag),"Disable")

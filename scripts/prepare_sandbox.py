@@ -1,7 +1,7 @@
 """Stage an offline Windows Sandbox acceptance test from reviewed local files.
 
 No downloads, no automatic launch, no credentials or project directory mapping.
-Verify the Python installer Authenticode signature separately before staging.
+Verify the Python Authenticode or PSF NuGet signature separately before staging.
 """
 import argparse
 import hashlib
@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 SCRIPTS=("install_standalone.py","sandbox_acceptance.ps1","smoke_app_offscreen.py",
          "smoke_captions_mock.py","check_hotkey_lifecycle.py")
 PYTHON_INSTALLER="python-3.11.9-amd64.exe"  # historical qualification baseline
+PYTHON_NUGET="python.3.11.9.nupkg"
 WHEEL="omoi_voxbridge-0.1.0-py3-none-any.whl"
 
 
@@ -22,15 +23,19 @@ def digest(p):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--python-installer",required=True,type=Path)
+    runtime=p.add_mutually_exclusive_group(required=True)
+    runtime.add_argument("--python-installer",type=Path)
+    runtime.add_argument("--python-nupkg",type=Path,help="Previously signature-verified PSF NuGet x64 package")
     p.add_argument("--python-sha256",required=True)
     p.add_argument("--wheelhouse",required=True,type=Path)
     p.add_argument("--wheel-sha256",required=True)
     p.add_argument("--target",required=True,type=Path)
     a=p.parse_args()
     wheel=a.wheelhouse/WHEEL
-    if not a.python_installer.is_file() or digest(a.python_installer)!=a.python_sha256.lower():
-        p.error("Python installer digest mismatch")
+    python_asset=a.python_nupkg or a.python_installer
+    python_name=PYTHON_NUGET if a.python_nupkg else PYTHON_INSTALLER
+    if not python_asset.is_file() or digest(python_asset)!=a.python_sha256.lower():
+        p.error("Python asset digest mismatch")
     if not wheel.is_file() or digest(wheel)!=a.wheel_sha256.lower():
         p.error("Application wheel digest mismatch")
     if a.target.exists() or not a.target.is_absolute():
@@ -45,7 +50,7 @@ def main():
         (inputs/"wheelhouse").mkdir(parents=True)
         output.mkdir()
         for f in wheels:shutil.copyfile(f,inputs/"wheelhouse"/f.name)
-        shutil.copyfile(a.python_installer,inputs/PYTHON_INSTALLER)
+        shutil.copyfile(python_asset,inputs/python_name)
         for name in SCRIPTS:
             shutil.copyfile(Path(__file__).resolve().parent/name,inputs/name)
         (inputs/"python.sha256").write_text(a.python_sha256.lower(),encoding="ascii")

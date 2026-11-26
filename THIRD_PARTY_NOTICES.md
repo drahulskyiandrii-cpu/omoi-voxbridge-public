@@ -1,7 +1,7 @@
-# Third-party dependency inventory (private review, 2026-11-26)
+# Third-party dependencies
 
-The snapshot includes project source, not third-party Python packages or
-model weights. The following direct dependency metadata was observed in
+The repository contains application source. Third-party Python packages
+are installed separately; model weights are not included. The following direct dependency metadata was observed in
 the development environment, not a complete legal or transitive audit.
 
 | Distribution | Tested version | Installed package license metadata |
@@ -21,6 +21,5 @@ Version ranges are in pyproject.toml. Qt distribution obligations and
 transitive notices must be reviewed before shipping a bundled installer.
 OpenVINO, Faster-Whisper, llama.cpp, Qwen, Gemma and their specific weights,
 adapters and runtimes have independent terms. No private voice recordings,
-third-party models or external worker source are distributed in this ZIP.
-Do not redistribute until rights and required notices are independently
-verified. See LICENSE_STATUS.md.
+third-party models or external worker source are included in the source repository.
+Distribution requires the applicable rights and license notices. See LICENSE_STATUS.md.
