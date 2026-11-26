@@ -18,7 +18,10 @@ OMOI-VoxBridge/
   scripts/              Installation, Start und Prüfungen
   docs/                 Dokumentation
   AGENTS.md             Technische Arbeitsregeln
-  LICENSE_STATUS.md     Lizenzstatus
+  LICENSE               MIT-Lizenz
+  LICENSE_STATUS.md     Lizenzumfang
+  SECURITY.md           Sicherheit und Datenschutz
+  CHANGELOG.md          Versionsverlauf
   THIRD_PARTY_NOTICES.md Fremdbibliotheken
   SOURCE_MANIFEST.json  Versionsstand und Prüfsummen
   .gitignore            Ausgeschlossene lokale Dateien

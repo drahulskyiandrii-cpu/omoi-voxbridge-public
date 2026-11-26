@@ -1,10 +1,12 @@
-# Lizenzstatus
+# Lizenz und externe Komponenten
 
-Der Quellcode befindet sich in Entwicklung. Eine öffentliche Lizenzfreigabe
-steht noch aus. Für den eigenen Quellcode ist die MIT-Lizenz vorgesehen.
+Der enthaltene Anwendungscode und die Projektdokumentation stehen unter
+der [MIT-Lizenz](LICENSE). Die Lizenz umfasst keine separat bezogenen
+Bibliotheken, externen Worker, Modelle, Adapter, Stimmen oder API-Dienste.
+Deren jeweilige Nutzungsbedingungen gelten unverändert.
 
-Für externe Bibliotheken, Modellgewichte, Worker und Sprachdaten gelten
-separate Lizenzbedingungen. Die Übersicht steht in THIRD_PARTY_NOTICES.md.
-Modellgewichte und Sprachaufnahmen sind nicht enthalten. Vor der Verteilung
-eines Installationspakets sind die erforderlichen Lizenztexte und
-Nutzungsrechte zu prüfen.
+Die [Drittanbieterhinweise](THIRD_PARTY_NOTICES.md) dokumentieren den
+getesteten Stand. Modellgewichte und Sprachaufnahmen sind nicht enthalten.
+Ein gebündelter EXE/MSI-Installer oder ein Modellpaket ist nicht Teil
+dieser Quellcode-Vorschau. Vor einer solchen Verteilung sind zusätzliche
+Lizenztexte, Weitergaberechte und Qt-Pflichten zu prüfen.

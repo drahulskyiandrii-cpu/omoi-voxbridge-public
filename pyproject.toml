@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "omoi-voxbridge"
 version = "0.1.0"
-description = "Standalone Windows voice bridge with opt-in cloud and future local captions"
+description = "Windows speech interface for dictation, read-aloud, live captions and opt-in AI analysis"
 requires-python = ">=3.11"
 dependencies = [
     "PySide6-Addons>=6.8,<7",

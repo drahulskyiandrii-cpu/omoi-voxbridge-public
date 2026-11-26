@@ -19,17 +19,18 @@ Die Tests verwenden synthetische Daten und nachgebildete Schnittstellen. Sie sta
 
 | Prüfung | Stand |
 | --- | --- |
-| Offline-Regression | Automatisierter Test |
+| Offline-Regression | 764 Tests am 26.11.2026, ohne Skip (Stand vor Dokumentationsaktualisierung) |
 | Start, Dialoge, Abbruch und Beenden | Qt-Offscreen-Smoke; Tray-Start, Fenster ausblenden, Beenden und verzögerte Freigabe |
 | Untertitel und Übersetzungsaufträge | Mock- und Protokolltests |
 | Unabhängige Installation aller Python-Abhängigkeiten | Offline-Wheelhouse, geprüft auf Host und in Windows Sandbox |
-| Native Hotkey-Registrierung, Konflikt, Freigabe | In Windows Sandbox geprüft |
+| Native Hotkey-Registrierung, Konflikt, Freigabe | In Windows Sandbox geprüft; Kombinationen können bereits belegt sein |
 | OpenAI, Groq, Cartesia | Begrenzte echte API-Tests mit synthetischen Daten |
 | Reale Mikrofone, Systemaudio, Lautsprecher | Ausstehende native Abnahme |
 | Notepad, Word und Browser | Kompatibilitätsprüfung ausstehend |
 | CUDA, GPU-LLM und lokales TTS | Separate Modell-/GPU-Abnahme erforderlich |
 | Lokale Echtzeitübersetzung | Noch nicht freigegeben |
-| Lizenz und verteilbares EXE/MSI | Nicht abgeschlossen |
+| OpenVINO CPU (DE/RU) | Zwei synthetische Audio-Beispiele in installierter Version geprüft; SDK und Modell separat |
+| Verteilbares EXE/MSI und Modellpaket | Nicht Teil der Quellcode-Vorschau |
 
 ## Native Prüfschritte
 

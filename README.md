@@ -1,6 +1,6 @@
 # OMOI VoxBridge
 
-**Sprachschnittstelle für Windows 11** · Python 3.11 · PySide6 · Version 0.1.0
+**Sprachschnittstelle für Windows 11** · Python 3.11 · PySide6 · Version 0.1.0 Preview
 
 OMOI VoxBridge verbindet Spracheingabe, Vorlesen, Live-Untertitel und KI-gestützte Analyse mit Windows-Anwendungen. Das Projekt demonstriert Systemintegration anhand von Windows-APIs, Audioverarbeitung, lokalen Laufzeiten, Cloud-Schnittstellen und sicherer Prozesssteuerung.
 
@@ -8,7 +8,7 @@ OMOI VoxBridge verbindet Spracheingabe, Vorlesen, Live-Untertitel und KI-gestüt
 
 | Funktion | Implementierung | Stand |
 | --- | --- | --- |
-| Diktat | OpenAI, Groq, OpenVINO CPU, Faster-Whisper CUDA | Cloud-Anbindung geprüft; native Zielprogramme und GPU separat prüfen |
+| Diktat | OpenAI, Groq, OpenVINO CPU, Faster-Whisper CUDA | Cloud und OpenVINO CPU mit synthetischen Daten geprüft; native Zielprogramme und GPU separat prüfen |
 | Vorlesen | Cartesia, Qwen3-TTS über qualifizierten lokalen Worker | Cloud-Anbindung geprüft; lokale Bereitstellung und Audioabnahme offen |
 | Live-Untertitel | WASAPI, OpenAI Realtime, Cartesia Ink Preview | Synthetische Streams geprüft; echte Systemaudio-Abnahme offen |
 | Text- und Bildanalyse | OCR, OpenAI, lokale GGUF-Modelle, optional Anthropic | Cloud-Test mit synthetischen Daten; lokale Modelle separat prüfen |
@@ -34,12 +34,26 @@ Diagnose die separat installierte VoxBridge-Version verwenden. Der Start
 installiert nichts. Die unabhängige Wheel-Installation und Desktop-Verknüpfungen
 sind in [Installation](docs/INSTALLATION.md) beschrieben.
 
+Bei der ersten Nutzung sind je nach Backend eigene API-Schlüssel, eine
+Freigabe und eine Stimme bzw. separat bereitgestellte lokale Modelle nötig.
+Die Offline-Demo funktioniert ohne diese Voraussetzungen.
+
 Standard-Diktat: `Ctrl+Alt+Space` startet und beendet die Aufnahme.
 Modell, Mikrofon, Sprache und Hotkeys sind konfigurierbar. Cloud-Aufrufe
 benötigen ausdrückliche Freigaben. API-Schlüssel werden nur zur Laufzeit aus
 Umgebungsvariablen gelesen. Die Anwendung startet im Infobereich (Tray). Ein Doppelklick auf das Symbol
 öffnet das Kontrollzentrum. Das Schließkreuz blendet das Fenster aus.
 Nur Beenden im Tray-Menü beendet die Anwendung nach der Ressourcenfreigabe.
+
+## Bekannte Grenzen
+
+Die direkte Textauswahl ist von den Windows-UI-Automation-Schnittstellen
+des Zielprogramms abhängig. Bei nicht unterstützter normaler Textauswahl
+kann Text manuell mit Ctrl+C kopiert und standardmäßig mit
+Ctrl+Alt+Shift+S vorgelesen werden (konfigurierbar). Geschützte Inhalte
+werden nicht automatisch ausgelesen. Die automatische Texteingabe
+in beliebige Programme ist nicht garantiert. Lokale Laufzeiten werden
+nicht mitinstalliert; die Anleitung beschreibt die benötigten Pfade.
 
 ## Offline-Demonstration
 
@@ -81,9 +95,12 @@ Die Oberfläche bleibt von Inferenz und Gerätezugriff getrennt. Sitzungs-IDs ve
 | [Installation](docs/INSTALLATION.md) | Wheel, lokale Laufzeiten, API-Konfiguration und Sandbox |
 | [Projektvorstellung](docs/PROJEKTVORSTELLUNG.md) | Ablauf einer Kurzpräsentation mit Offline-Demo |
 | [Prüfungen](docs/TESTS.md) | Reproduzierbare Tests, Abnahmestand und Grenzen |
-| [Lizenzstatus](LICENSE_STATUS.md) | Geplante MIT-Freigabe und offene Lizenzprüfung |
+| [MIT-Lizenz](LICENSE) | Lizenz des enthaltenen Quellcodes |
+| [Lizenzumfang](LICENSE_STATUS.md) | Abgrenzung externer Komponenten |
+| [Sicherheit](SECURITY.md) | Sicherheitsmeldungen und Datenschutz |
+| [Versionsverlauf](CHANGELOG.md) | Funktionsumfang der Vorschau |
 | [Abhängigkeiten](THIRD_PARTY_NOTICES.md) | Lizenzmetadaten externer Bibliotheken |
 
 `src/voxbridge/` enthält die Anwendung, `tests/` die Regressionstests, `scripts/` Installation, Diagnose und Prüfskripte. `SOURCE_MANIFEST.json` dokumentiert den Versionsstand und SHA-256-Prüfsummen.
 
-**Entwicklungsstand:** Die unabhängige Python-Installation und grundlegende Windows-Integration sind geprüft. Physische Audiogeräte, reale Zielanwendungen, autonome lokale Modellbereitstellung und GPU-Abnahme bleiben eigene Prüfschritte. Der Quellcode ist keine freigegebene Endversion.
+**Entwicklungsstand:** Die unabhängige Python-Installation und grundlegende Windows-Integration sind geprüft. Physische Audiogeräte, reale Zielanwendungen, autonome lokale Modellbereitstellung und GPU-Abnahme bleiben eigene Prüfschritte. Diese Version ist eine technische Quellcode-Vorschau, keine stabile Endversion.

@@ -11,6 +11,16 @@ DOCS = ROOT / "distribution" if (ROOT / "distribution/README.md").is_file() else
 
 
 class PresentationAssetsTests(unittest.TestCase):
+    def test_preview_license_and_public_docs(self):
+        license_text = (DOCS / "LICENSE").read_text(encoding="utf-8")
+        self.assertTrue(license_text.startswith("MIT License"))
+        self.assertIn('THE SOFTWARE IS PROVIDED "AS IS"', license_text)
+        for name in ("SECURITY.md", "CHANGELOG.md", "LICENSE_STATUS.md"):
+            self.assertTrue((DOCS/name).is_file(), name)
+        readme = (DOCS/"README.md").read_text(encoding="utf-8")
+        self.assertIn("0.1.0 Preview", readme)
+        self.assertIn("](LICENSE)", readme)
+
     def test_markdown_navigation_and_architecture_modules(self):
         files = [DOCS / "README.md", *sorted((DOCS / "docs").glob("*.md"))]
         self.assertGreaterEqual(len(files), 5)

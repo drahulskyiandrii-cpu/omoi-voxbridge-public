@@ -67,14 +67,17 @@ VOXBRIDGE_RUNTIME_ROOT kann ein anderer absoluter Ordner gewählt werden.
 Der bisherige Startbefehl bleibt nur für bestehende Entwicklungsumgebungen.
 Im unabhängigen Modus gibt es keinen automatischen Rückgriff auf Mini-Assets.
 
-Alle Pfade sind Beispiele. Modelle und externe Laufzeiten werden nicht
+Alle Pfade sind Beispiele. Die Meldung OPENVINO_WORKER_NOT_INSTALLED
+bedeutet, dass Node, der SDK-Ordner oder der Modellordner fehlt.
+Das Programm installiert diese Komponenten nicht automatisch. Modelle und externe Laufzeiten werden nicht
 mitgeliefert. Variablen in PowerShell vor dem Start setzen; nur die für
 das gewählte Backend erforderlichen Werte angeben.
 
 ```powershell
 $env:VOXBRIDGE_RUNTIME_ROOT = 'D:\SpeechRuntime'
 
-# CPU STT: Node on PATH, SDK includes node_modules/openvino-genai-node
+# CPU STT: Node >=21 on PATH; tested Node 24.20.0, SDK 2026.4.0
+# SDK includes node_modules/openvino-genai-node
 $env:VOXBRIDGE_OPENVINO_SDK_DIR = 'D:\SpeechRuntime\openvino-sdk'
 $env:VOXBRIDGE_OPENVINO_MODEL_DIR = 'D:\SpeechRuntime\whisper-medium-int8-ov'
 
