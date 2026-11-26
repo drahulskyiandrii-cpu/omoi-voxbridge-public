@@ -24,6 +24,7 @@ from .session_limits import (
 )
 from .cloud_providers import OpenAIResponses, close_provider, PROVIDER_CLEANUP_FAILED
 from .realtime_transport import RealtimeTransportFailure, run_realtime_transcription
+from .cartesia_realtime import run_ink_transcription
 from .wasapi_capture import CaptureFailure, LoopbackDevice
 from .capture_isolation import capture_live, capture_block_reason
 from .device_discovery import discover_loopback_devices
@@ -46,6 +47,7 @@ class LiveCaptionsDialog(PrivateDialog):
                  discover_devices=discover_loopback_devices,
                  capture=capture_live,
                  transcribe=run_realtime_transcription,
+                 ink_transcribe=run_ink_transcription,
                  translation_factory=OpenAIResponses,
                  can_start=None, preference_loader=None, preference_saver=None,
                  permission_checker=None, local_translation_factories=None):
@@ -58,6 +60,7 @@ class LiveCaptionsDialog(PrivateDialog):
         self._discover = discover_devices
         self._capture = capture
         self._transcribe = transcribe
+        self._ink_transcribe = ink_transcribe
         self._translation_factory = translation_factory
         # Only explicitly registered, identity-verified CPU factories are permitted.
         # Selecting an engine never launches it; Gemma production registration withdrawn.
@@ -88,7 +91,7 @@ class LiveCaptionsDialog(PrivateDialog):
 
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(
-            "Systemton (WASAPI) → OpenAI gpt-live-transcribe.\n"
+            "Systemton (WASAPI) → Cloud STT.\n"
             "Звук всех программ выбранного устройства будет передаваться в облако "
             "только после Start и отдельного согласия."
         ))
@@ -110,6 +113,14 @@ class LiveCaptionsDialog(PrivateDialog):
         self.seconds.setSuffix(" Sekunden")
         row.addWidget(self.seconds)
         layout.addLayout(row)
+
+        provider_row = QHBoxLayout()
+        provider_row.addWidget(QLabel("STT / API:"))
+        self.stt_provider = QComboBox(self)
+        self.stt_provider.addItem("OpenAI gpt-live-transcribe", "openai")
+        self.stt_provider.addItem("Cartesia Ink Preview (experimental)", "cartesia_preview")
+        provider_row.addWidget(self.stt_provider, 1)
+        layout.addLayout(provider_row)
 
         language_row = QHBoxLayout()
         language_row.addWidget(QLabel("Original / Язык речи:"))
@@ -159,6 +170,7 @@ class LiveCaptionsDialog(PrivateDialog):
         self.translation_consent = QCheckBox(self)
         layout.addWidget(self.translation_consent)
         layout.addWidget(QLabel("Oder dauerhafte Freigaben im Tray / Или постоянные разрешения в трее."))
+        self.stt_provider.currentIndexChanged.connect(self._stt_changed)
         self.translation_engine.currentIndexChanged.connect(self._engine_changed)
         self.translation_limit.valueChanged.connect(self._mode_changed)
         self.seconds.valueChanged.connect(self._invalidate_consent)
@@ -168,6 +180,7 @@ class LiveCaptionsDialog(PrivateDialog):
         self.delay.currentIndexChanged.connect(self._invalidate_consent)
         self._source_changed()
         self._mode_changed()
+        self._stt_changed()
 
         controls = QHBoxLayout()
         self.start = QPushButton("Start / Начать")
@@ -257,10 +270,12 @@ class LiveCaptionsDialog(PrivateDialog):
             display_mode=self.display_mode.currentData(), font_size=self.font_size.value(),
             visible_lines=self.visible_lines.value(), opacity=self.opacity.value(),
             group_sentences=self.group_sentences.isChecked(),
+            stt_provider=self.stt_provider.currentData(),
         ).validate()
 
     def _apply_preferences(self, prefs):
         prefs.validate()
+        self.stt_provider.setCurrentIndex(self.stt_provider.findData(prefs.stt_provider))
         self.source_language.setCurrentIndex(self.source_language.findData(prefs.source))
         self.target_language.setCurrentIndex(self.target_language.findData(prefs.target))
         self.translation_engine.setCurrentIndex(self.translation_engine.findData(
@@ -291,6 +306,15 @@ class LiveCaptionsDialog(PrivateDialog):
         if not self._busy:
             self._apply_preferences(CaptionPreferences())
             self.status.setText("Standardwerte wiederhergestellt; Speichern ist optional.")
+
+    def _stt_changed(self, *args):
+        ink = self.stt_provider.currentData() == "cartesia_preview"
+        name = "Cartesia Ink Preview" if ink else "OpenAI"
+        self.audio_consent.setText(
+            f"Ich erlaube die ggf. kostenpflichtige Systemaudio-Uebertragung an {name}. "
+            f"/ \u0420\u0430\u0437\u0440\u0435\u0448\u0430\u044e \u043f\u0435\u0440\u0435\u0434\u0430\u0447\u0443 \u0437\u0432\u0443\u043a\u0430 \u0432 {name}.")
+        self.delay.setEnabled(not ink and not self._busy)
+        self._invalidate_consent()
 
     def _engine_changed(self, *args):
         self._invalidate_consent()
@@ -435,8 +459,14 @@ class LiveCaptionsDialog(PrivateDialog):
         if not isinstance(device_id, str) or not device_id:
             self.status.setText("Bitte zuerst ein Loopback-Ausgabegerät wählen.")
             return
+        stt_provider = self.stt_provider.currentData()
+        if stt_provider not in ("openai", "cartesia_preview"):
+            self.status.setText("CAPTION_PREF_STT_PROVIDER")
+            return
+        ink = stt_provider == "cartesia_preview"
+        audio_scope = "captions_cartesia_audio" if ink else "captions_openai_audio"
         if not (self.audio_consent.isChecked() or
-                approved(self._permission_checker, "captions_openai_audio")):
+                approved(self._permission_checker, audio_scope)):
             self.status.setText("Cloud-Audio-Freigabe ist erforderlich.")
             return
         engine = self.translation_engine.currentData()
@@ -451,7 +481,10 @@ class LiveCaptionsDialog(PrivateDialog):
                                   self._permission_checker, "captions_openai_translation"))):
             self.status.setText("Separate Zustimmung zur Übersetzung erforderlich.")
             return
-        if not os.environ.get("OPENAI_API_KEY"):
+        if ink and not os.environ.get("CARTESIA_API_KEY"):
+            self.status.setText("CARTESIA_API_KEY_MISSING")
+            return
+        if (not ink or cloud_translation) and not os.environ.get("OPENAI_API_KEY"):
             self.status.setText("OPENAI_API_KEY_MISSING")
             return
 
@@ -476,6 +509,7 @@ class LiveCaptionsDialog(PrivateDialog):
         self.refresh.setEnabled(False)
         self.devices.setEnabled(False)
         self.seconds.setEnabled(False)
+        self.stt_provider.setEnabled(False)
         self.translation_engine.setEnabled(False)
         self.source_language.setEnabled(False)
         self.delay.setEnabled(False)
@@ -491,7 +525,7 @@ class LiveCaptionsDialog(PrivateDialog):
             group_sentences=self.group_sentences.isChecked(),
         )
         self._overlay.show()
-        self.status.setText("REALTIME_CONNECTING — OpenAI-Verbindung…")
+        self.status.setText("REALTIME_CONNECTING - " + ("Cartesia" if ink else "OpenAI"))
 
         # Session references are immutable for worker lifetime; a new session
         # must not start until BOTH audio and in-flight LLM workers finish.
@@ -501,6 +535,7 @@ class LiveCaptionsDialog(PrivateDialog):
         quota = self._quota
         usage = self._usage
         provider_factory = self._translation_factory
+        transcribe = self._ink_transcribe if ink else self._transcribe
 
         def translate_worker(provider=None):
             try:
@@ -596,7 +631,7 @@ class LiveCaptionsDialog(PrivateDialog):
                 # Capture begins only after explicit local preflight, if selected.
                 # Transport separately validates cloud consent and authentication.
                 audio = self._capture(device_id, stop, seconds=seconds)
-                turns = self._transcribe(
+                turns = transcribe(
                     coordinator, caption_generation, audio,
                     approved=True, stop=stop, max_seconds=seconds, usage=usage, delay=delay,
                     on_stage=lambda stage: self.signals.stage.emit(generation, stage),
@@ -700,9 +735,10 @@ class LiveCaptionsDialog(PrivateDialog):
         self.refresh.setEnabled(True)
         self.devices.setEnabled(True)
         self.seconds.setEnabled(True)
+        self.stt_provider.setEnabled(True)
         self.translation_engine.setEnabled(True)
         self.source_language.setEnabled(True)
-        self.delay.setEnabled(True)
+        self._stt_changed()
         self._mode_changed()
         if self._capture is capture_live and capture_block_reason() == "WASAPI_CHILD_CLEANUP_FAILED":
             self.start.setEnabled(False)

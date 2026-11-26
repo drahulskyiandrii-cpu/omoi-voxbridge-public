@@ -5,6 +5,7 @@ from .cloud_permissions import CloudPermissions, load_permissions, save_permissi
 
 
 LABELS = {
+    "captions_cartesia_audio": "Live-Untertitel / Cartesia Ink Preview (Systemton)",
     "dictation_groq": "Diktieren / Groq (Mikrofon)",
     "dictation_openai": "Diktieren / Диктовка — OpenAI (Mikrofon / микрофон)",
     "analysis_openai": "Textanalyse / Анализ текста — OpenAI",

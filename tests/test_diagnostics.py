@@ -38,7 +38,7 @@ class DiagnosticsTests(unittest.TestCase):
             save_permissions(CloudPermissions(tts_cartesia=True), path / "cloud_permissions.json")
             checks = collect(config_dir=path, environ={}, package_version=lambda _: "1")
             self.assertEqual(next(c.status for c in checks if c.name == "STT mode"), "blocked")
-            self.assertEqual(next(c.detail for c in checks if c.name == "standing permissions"), "1 of 8 enabled")
+            self.assertEqual(next(c.detail for c in checks if c.name == "standing permissions"), "1 of 9 enabled")
 
     def test_missing_dependencies(self):
         def metadata(name):

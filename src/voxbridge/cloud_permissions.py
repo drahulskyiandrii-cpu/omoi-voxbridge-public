@@ -15,6 +15,7 @@ class CloudPermissions:
     vision_openai: bool = False
     tts_cartesia: bool = False
     captions_openai_audio: bool = False
+    captions_cartesia_audio: bool = False
     captions_openai_translation: bool = False
 
     def validate(self):

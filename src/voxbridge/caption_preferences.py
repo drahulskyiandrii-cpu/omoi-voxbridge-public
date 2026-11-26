@@ -22,6 +22,7 @@ class CaptionPreferences:
     opacity: int = 100
     translation_engine: str = "cloud"
     group_sentences: bool = False
+    stt_provider: str = "openai"
 
     def validate(self):
         if (self.source not in ("de", "ru", "en")
@@ -30,6 +31,8 @@ class CaptionPreferences:
             raise ValueError("CAPTION_PREF_LANGUAGE")
         if type(self.translate) is not bool or type(self.group_sentences) is not bool:
             raise ValueError("CAPTION_PREF_TRANSLATE")
+        if self.stt_provider not in ("openai", "cartesia_preview"):
+            raise ValueError("CAPTION_PREF_STT_PROVIDER")
         if self.translation_engine not in ("cloud", "gemma_cpu", "specialist"):
             raise ValueError("CAPTION_PREF_ENGINE")
         if self.delay not in ("minimal", "low", "medium", "high", "xhigh"):

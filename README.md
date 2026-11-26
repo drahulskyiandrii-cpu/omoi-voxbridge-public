@@ -140,7 +140,7 @@ Fenster noch zu einer unangekuendigten Cloud-Anfrage fuehren.
 | Diktat | OpenAI; Groq; OpenVINO CPU; Faster-Whisper CUDA | reale Zielanwendungen, GPU |
 | Vorlesen | Cartesia; separat qualifizierter Qwen-Worker | Audioausgabe, autonomer Qwen-Worker |
 | Analyse | OCR; OpenAI; lokale GGUF-Modelle; optional Anthropic | reale Bildschirmregion, lokale Modelle |
-| Live-Untertitel | OpenAI Realtime, optional Cloud-Uebersetzung | WASAPI, Overlay, laengere Sitzungen |
+| Live-Untertitel | OpenAI Realtime; Cartesia Ink Preview (experimentell); optional Cloud-Uebersetzung | WASAPI, Overlay, laengere Sitzungen |
 | MCP | explizite stdio-Schnittstelle | externe Client-Abnahme |
 | Offline-Uebersetzung / Streaming-STT | nicht freigegeben | Qualitaets- und Laufzeittests |
 
@@ -151,6 +151,10 @@ Vor einem Aufruf muessen Zugangsdaten und die erforderliche Freigabe vorhanden
 sein. Cloud-Schluessel werden zur Laufzeit ueber Umgebungsvariablen gelesen
 (OPENAI_API_KEY, GROQ_API_KEY, CARTESIA_API_KEY, optional ANTHROPIC_API_KEY).
 Groq Whisper Large V3 verarbeitet abgeschlossene Aufnahmen, keine Live-Untertitel.
+Cartesia Ink Preview ist eine optionale experimentelle Live-STT-Schnittstelle.
+Sie nutzt eine eigene Freigabe fuer Systemaudio; OpenAI bleibt Standard.
+Bei aktivierter Cloud-Uebersetzung ist auch die OpenAI-Freigabe notwendig.
+Die Preview-Version kann sich serverseitig aendern. Keine automatische Ausweichroute.
 Die Groq-Freigabe ist getrennt von OpenAI. Kosten sind je nach Tarif moeglich.
 Nicht in Dateien oder Git speichern.
 

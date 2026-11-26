@@ -708,5 +708,40 @@ class LiveCaptionsUITests(unittest.TestCase):
         dlg.close()
 
 
+    def test_ink_provider_own_consent_and_key(self):
+        ink=Mock(side_effect=self.fake_transcribe)
+        dlg=self.new_dialog(ink_transcribe=ink,permission_checker=lambda scope:scope=="captions_openai_audio")
+        dlg.devices.addItem("Test speakers","fake_wasapi_loopback")
+        dlg.audio_consent.setChecked(True)
+        dlg.stt_provider.setCurrentIndex(dlg.stt_provider.findData("cartesia_preview"))
+        self.assertFalse(dlg.audio_consent.isChecked())
+        self.assertFalse(dlg.delay.isEnabled())
+        self.assertIn("Cartesia",dlg.audio_consent.text())
+        with patch.dict(os.environ,{"OPENAI_API_KEY":"","CARTESIA_API_KEY":"synthetic"}):
+            dlg._start()
+            self.assertFalse(dlg._busy)
+            ink.assert_not_called()
+            dlg.audio_consent.setChecked(True)
+            dlg._start()
+            self.wait_idle(dlg)
+            ink.assert_called_once()
+        self.assertFalse(dlg.delay.isEnabled())
+        self.assertTrue(dlg.stt_provider.isEnabled())
+
+    def test_ink_cloud_translation_needs_openai_key_too(self):
+        ink=Mock()
+        dlg=self.new_dialog(ink_transcribe=ink)
+        dlg.devices.addItem("Test speakers","fake_wasapi_loopback")
+        dlg.stt_provider.setCurrentIndex(dlg.stt_provider.findData("cartesia_preview"))
+        dlg.translation_engine.setCurrentIndex(dlg.translation_engine.findData("cloud"))
+        dlg.audio_consent.setChecked(True)
+        dlg.translation_consent.setChecked(True)
+        with patch.dict(os.environ,{"OPENAI_API_KEY":"","CARTESIA_API_KEY":"synthetic"}):
+            dlg._start()
+            self.assertFalse(dlg._busy)
+            self.assertEqual(dlg.status.text(),"OPENAI_API_KEY_MISSING")
+        ink.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
