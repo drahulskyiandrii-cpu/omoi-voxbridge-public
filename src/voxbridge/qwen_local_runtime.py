@@ -125,7 +125,8 @@ def verify_files(mode):
         if (not adapter.is_file() or adapter.stat().st_size != 34908456
                 or hashlib.sha256(adapter.read_bytes()).hexdigest() != CF_SHA):
             raise LocalTTSFailure("QWEN_CF50_ADAPTER_INVALID")
-    cache = Path(os.environ["LOCALAPPDATA"]) / "OMOI-VoxBridge" / "runtime"
+    from .config import config_path
+    cache = config_path().parent / "runtime"
     return python, immutable_worker(worker, cache,
                                     allow_git_fallback=_standalone() is None and "VOXBRIDGE_QWEN_WORKER" not in os.environ)
 

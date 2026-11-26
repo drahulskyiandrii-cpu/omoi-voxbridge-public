@@ -38,3 +38,28 @@ class TestConfig(unittest.TestCase):
             file.write_text('{"token":"secret"}', encoding="utf-8")
             with self.assertRaises(ValueError):
                 load_settings(file)
+
+
+    def test_explicit_standalone_profile_isolated_from_existing_development(self):
+        import os
+        from unittest.mock import patch
+        from voxbridge.config import config_path
+        from voxbridge.cloud_permissions import permission_path
+        from voxbridge.caption_preferences import preferences_path
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            with patch.dict(os.environ, {"LOCALAPPDATA":str(root),"VOXBRIDGE_PROFILE_ROOT":str(root/"standalone")}):
+                self.assertEqual(config_path(),root/"standalone/settings.json")
+                self.assertEqual(permission_path(),root/"standalone/cloud_permissions.json")
+                self.assertEqual(preferences_path(),root/"standalone/captions.json")
+                self.assertEqual(load_settings(),Settings())
+                self.assertFalse((root/"standalone").exists())
+
+    def test_invalid_profile_does_not_fall_back(self):
+        import os
+        from unittest.mock import patch
+        from voxbridge.config import config_path
+        for invalid in ("","relative"):
+            with patch.dict(os.environ, {"VOXBRIDGE_PROFILE_ROOT":invalid}):
+                with self.assertRaisesRegex(ValueError,"PROFILE_ROOT_INVALID"):
+                    config_path()

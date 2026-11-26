@@ -142,6 +142,12 @@ def layout_safe_hotkeys(settings: Settings) -> Settings:
 
 
 def config_path() -> Path:
+    profile = os.environ.get("VOXBRIDGE_PROFILE_ROOT")
+    if profile is not None:
+        path = Path(profile)
+        if not profile.strip() or not path.is_absolute():
+            raise ValueError("PROFILE_ROOT_INVALID")
+        return path.resolve() / "settings.json"
     root = os.environ.get("LOCALAPPDATA")
     return (Path(root) / "OMOI-VoxBridge" / "settings.json") if root else (Path.home() / ".omoi-voxbridge" / "settings.json")
 

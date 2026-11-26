@@ -37,6 +37,39 @@ keine fremden Stimmen oder Gewichte ohne deren Nutzungsrechte.
 Qt wird mit passenden Addons, Essentials und shiboken6 installiert.
 Qt PDF und WebEngine sind für VoxBridge nicht erforderlich.
 
+## Unabhaengige Installation aus dem Wheel
+
+Voraussetzung: 64-Bit Python 3.11 auf Windows. Das gepruefte Wheel und
+dessen SHA256-Pruefsumme separat bereitstellen. Keine Administratorrechte,
+kein Autostart, kein Zugriff auf vorhandene Entwicklungsumgebungen.
+Standardziel: LocalAppData/Programs/OMOI-VoxBridge. Das Ziel darf noch
+nicht existieren; vorhandene Installationen werden nie ueberschrieben.
+
+    py -3.11 -I scripts/install_standalone.py --wheel C:/Downloads/omoi_voxbridge-0.1.0-py3-none-any.whl --sha256 SHA256 --plan
+
+Nach Kontrolle denselben Befehl ohne --plan ausfuehren. Optional
+--wheelhouse C:/Downloads/wheelhouse fuer eine vollstaendige lokale
+Wheelsammlung (keine Netzwerkabhaengigkeiten waehrend der Installation).
+Ohne wheelhouse werden Python-Abhaengigkeiten von PyPI bezogen.
+Start-VoxBridge.cmd und Doctor.cmd liegen im neuen Installationsordner.
+Die beiden Startskripte verwenden ein separates Profil unter
+LocalAppData/OMOI-VoxBridge-Standalone. Die Entwicklungsprofile und
+bestehenden Berechtigungen werden nicht uebernommen oder veraendert. Zum Entfernen erst
+VoxBridge normal beenden und dann nur den eigenen Installationsordner
+entfernen. Benutzerprofile und Modellordner nicht automatisch loeschen.
+Dies ist ein Python-basierter Installer, kein selbstenthaltendes EXE/MSI.
+
+Windows Sandbox: scripts/sandbox_acceptance.ps1 ist ein expliziter
+Test fuer eine frische VM, keine normale Installation. Die VM soll
+keinen Netzwerk-, GPU-, Mikrofon- oder Clipboard-Zugriff haben.
+Nur ein eigens vorbereiteter schreibgeschuetzter Eingabeordner und
+ein separater Ergebnisordner werden eingebunden. Keine privaten
+Modelle, Anwendungsprofile oder Zugangsdaten freigeben.
+scripts/prepare_sandbox.py --help beschreibt die Vorbereitung aus einem
+lokalen, bereits geprueften Python-Installer und einem Wheelhouse.
+Die historische Sandbox-Basis Python 3.11.9 ist nur ein Teststand,
+keine Empfehlung zur Installation einer veralteten Python-Version.
+
 ## Lokale Laufzeit (separat vorbereitete Komponenten)
 
 Der installierte Startbefehl voxbridge-standalone verwendet standardmäßig
