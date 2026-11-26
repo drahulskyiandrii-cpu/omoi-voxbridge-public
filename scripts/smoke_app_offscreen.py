@@ -20,7 +20,8 @@ def main():
     app = QApplication([])
     app.setQuitOnLastWindowClosed(False)
     with tempfile.TemporaryDirectory(prefix="voxbridge-smoke-") as directory, \
-         patch.dict(os.environ, {"LOCALAPPDATA": directory}), \
+         patch.dict(os.environ, {"LOCALAPPDATA": directory, "VOXBRIDGE_PROFILE_ROOT": directory,
+                                  "VOXBRIDGE_RUNTIME_ROOT": str(Path(directory)/"local-runtime")}), \
          patch("voxbridge.app.HotkeyListener") as hotkey, \
          patch("voxbridge.selection_controller.HotkeyListener"), \
          patch("voxbridge.app.Microphone") as microphone, \

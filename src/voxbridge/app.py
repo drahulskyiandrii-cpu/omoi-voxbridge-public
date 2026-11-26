@@ -7,7 +7,7 @@ import threading
 import time
 from functools import partial
 
-from PySide6.QtCore import QObject, Signal, Slot, QTimer
+from PySide6.QtCore import QObject, Signal, Slot, QTimer, QLockFile
 from PySide6.QtWidgets import (
     QApplication, QMenu, QStyle, QSystemTrayIcon, QMessageBox,
 )
@@ -1389,27 +1389,53 @@ class VoxBridge(QObject):
             self.tray.hide()
 
 
-def main() -> int:
+def main(*, show_control_center=False) -> int:
     if os.name != "nt":
-        raise SystemExit("VoxBridge MVP1 requires Windows")
+        raise SystemExit("VoxBridge requires Windows")
     app = QApplication([])
     app.setQuitOnLastWindowClosed(False)
+    lock = None
+    bridge = None
     try:
+        if show_control_center:
+            from .config import config_path
+            profile = config_path().parent
+            profile.mkdir(parents=True, exist_ok=True)
+            lock = QLockFile(str(profile / "instance.lock"))
+            lock.setStaleLockTime(0)
+            if not lock.tryLock(0):
+                QMessageBox.information(None, "OMOI VoxBridge",
+                    "VoxBridge laeuft bereits oder das Profil ist nicht verfuegbar. "
+                    "Bitte das Tray-Symbol bzw. die Diagnose verwenden.")
+                return 2
         bridge = VoxBridge(app)
+        if show_control_center:
+            bridge.open_control_center()
+        return app.exec()
     except Exception as exc:
-        # No personal input has been captured yet.
-        from PySide6.QtWidgets import QMessageBox
+        if bridge is not None:
+            bridge.shutdown()
         QMessageBox.critical(None, "VoxBridge", "Start fehlgeschlagen: " + str(exc)[:120])
         return 2
-    return app.exec()
+    finally:
+        if lock is not None and lock.isLocked():
+            lock.unlock()
 
 
 def main_standalone() -> int:
-    """Installed launcher: independent runtime paths, without creating assets."""
+    """Installed launcher: independent profile/runtime and visible control centre."""
+    from pathlib import Path
     from .config import config_path
-    os.environ.setdefault("VOXBRIDGE_RUNTIME_ROOT",
-                          str(config_path().parent / "local-runtime"))
-    return main()
+    root = Path(os.environ.get("LOCALAPPDATA") or Path.home())
+    os.environ.setdefault("VOXBRIDGE_PROFILE_ROOT", str(root / "OMOI-VoxBridge-Standalone"))
+    try:
+        os.environ.setdefault("VOXBRIDGE_RUNTIME_ROOT",
+                              str(config_path().parent / "local-runtime"))
+    except (ValueError, OSError, RuntimeError):
+        app = QApplication([])
+        QMessageBox.critical(None, "VoxBridge", "PROFILE_ROOT_INVALID")
+        return 2
+    return main(show_control_center=True)
 
 
 if __name__ == "__main__":

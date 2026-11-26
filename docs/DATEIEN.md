@@ -6,6 +6,10 @@ Alle relativen Pfade beginnen im Projektordner `OMOI-VoxBridge`. Der Ordner kann
 
 ```text
 OMOI-VoxBridge/
+  Setup-VoxBridge.cmd   Einmalige Einrichtung
+  Start-VoxBridge.cmd   Anwendung starten
+  Demo-Untertitel.cmd   Offline-Demo
+  Doctor.cmd           Diagnose
   README.md             Einstieg
   pyproject.toml         Paket und Abhängigkeiten
   src/

@@ -18,27 +18,34 @@ Lokale Echtzeitübersetzung ist noch nicht freigegeben. Cartesia Ink Preview ist
 
 ## Schnellstart
 
-Voraussetzungen: Windows 11, Python 3.11 (64 Bit), PowerShell. Installation der Python-Abhängigkeiten aus dem Paketindex; kein automatischer Modell-Download.
+Voraussetzungen: Windows 11, Python 3.11 (64 Bit).
 
-```powershell
-.\scripts\install-dev.ps1 -Plan -IncludeMcp
-.\scripts\install-dev.ps1 -IncludeMcp
-$env:VOXBRIDGE_PROFILE_ROOT = Join-Path $env:LOCALAPPDATA 'OMOI-VoxBridge-Standalone'
-.\.venv\Scripts\voxbridge-doctor.exe
-.\.venv\Scripts\voxbridge-standalone.exe
-```
+| Datei | Funktion |
+| --- | --- |
+| `Setup-VoxBridge.cmd` | Einmalig Python-Abhängigkeiten installieren |
+| `Start-VoxBridge.cmd` | Anwendung mit Kontrollzentrum starten |
+| `Demo-Untertitel.cmd` | Offline-Beispiel für die Präsentation anzeigen |
+| `Doctor.cmd` | Voraussetzungen prüfen |
 
-Das Kontrollzentrum öffnet sich per Doppelklick auf das Tray-Symbol. Standard-Diktat: `Ctrl+Alt+Space` startet und beendet die Aufnahme. Modell, Mikrofon, Sprache und Hotkeys sind konfigurierbar. Cloud-Aufrufe benötigen eine ausdrückliche Freigabe. Schlüssel werden ausschließlich zur Laufzeit aus Umgebungsvariablen gelesen.
+Zuerst Setup, danach Start. Die Einrichtung aus dem Quellcode benötigt
+einen Paketindex; Modelle werden nicht automatisch heruntergeladen.
+Wenn keine projektbezogene .venv vorhanden ist, können Start, Demo und
+Diagnose die separat installierte VoxBridge-Version verwenden. Der Start
+installiert nichts. Die unabhängige Wheel-Installation und Desktop-Verknüpfungen
+sind in [Installation](docs/INSTALLATION.md) beschrieben.
 
-Für eine Installation außerhalb des Quellordners: [Installation und lokale Laufzeiten](docs/INSTALLATION.md).
+Standard-Diktat: `Ctrl+Alt+Space` startet und beendet die Aufnahme.
+Modell, Mikrofon, Sprache und Hotkeys sind konfigurierbar. Cloud-Aufrufe
+benötigen ausdrückliche Freigaben. API-Schlüssel werden nur zur Laufzeit aus
+Umgebungsvariablen gelesen. Das Kontrollzentrum öffnet sich beim unabhängigen
+Start; das Tray-Symbol bleibt auch bei geschlossenem Fenster verfügbar.
 
 ## Offline-Demonstration
 
-```powershell
-.\.venv\Scripts\python.exe scripts\demo_captions.py
-```
-
-Die Vorschau zeigt vorbereitete deutsche und russische Beispielsätze im echten Untertitel-Overlay. Sie benötigt weder ein Mikrofon noch ein Modell, API-Schlüssel oder Netzwerk. Die Texte sind Beispieldaten, keine Live-Transkription.
+`Demo-Untertitel.cmd` zeigt vorbereitete deutsche und russische Beispielsätze
+im echten Untertitel-Overlay. Es werden weder Mikrofon noch Modell,
+API-Schlüssel oder Netzwerk benötigt. Die Texte sind Beispieldaten, keine
+Live-Transkription.
 
 ## Architektur
 

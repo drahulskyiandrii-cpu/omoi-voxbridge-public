@@ -18,7 +18,7 @@ Die verschiedenen Modelle sind über Adapter eingebunden. Damit kann ich den Pro
 
 **4. Demonstration (90 Sekunden)**
 
-Zuerst zeige ich den Start und die Diagnose. Danach öffne ich die Offline-Untertitel-Demo. Sie zeigt vorbereitete deutsche Sätze und russische Übersetzungen. Zum Schluss erkläre ich anhand der Dateien `session.py` und `captions_core.py`, wie die Anwendung Zustände und Ergebnisse verwaltet.
+Zuerst zeige ich den Start per Verknüpfung und die Diagnose. Danach öffne ich die Offline-Untertitel-Demo. Sie zeigt vorbereitete deutsche Sätze und russische Übersetzungen. Zum Schluss erkläre ich anhand der Dateien `session.py` und `captions_core.py`, wie die Anwendung Zustände und Ergebnisse verwaltet.
 
 **5. Ergebnis und Ausblick (30 Sekunden)**
 

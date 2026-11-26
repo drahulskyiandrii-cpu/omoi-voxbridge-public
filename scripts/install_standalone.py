@@ -72,10 +72,10 @@ def run(argv=None):
             subprocess.run([str(python),"-I","-m","voxbridge.diagnostics"],cwd=target,
                            env=check_env,check=True,timeout=60)
         (target/"Start-VoxBridge.cmd").write_text(
-            '@echo off\r\nsetlocal\r\nset "VOXBRIDGE_PROFILE_ROOT=%LOCALAPPDATA%\\OMOI-VoxBridge-Standalone"\r\nstart "" "%~dp0venv\\Scripts\\pythonw.exe" -I -c "from voxbridge.app import main_standalone; raise SystemExit(main_standalone())"\r\n',
+            '@echo off\r\nsetlocal\r\nset "VOXBRIDGE_PROFILE_ROOT=%LOCALAPPDATA%\\OMOI-VoxBridge-Standalone"\r\nif not exist "%~dp0venv\\Scripts\\pythonw.exe" (echo Installation incomplete. & pause & exit /b 2)\r\nstart "" /D "%~dp0." "%~dp0venv\\Scripts\\pythonw.exe" -I -c "from voxbridge.app import main_standalone; raise SystemExit(main_standalone())"\r\n',
             encoding="ascii",newline="")
         (target/"Doctor.cmd").write_text(
-            '@echo off\r\nsetlocal\r\nset "VOXBRIDGE_PROFILE_ROOT=%LOCALAPPDATA%\\OMOI-VoxBridge-Standalone"\r\n"%~dp0venv\\Scripts\\python.exe" -I -m voxbridge.diagnostics\r\n',
+            '@echo off\r\nsetlocal\r\nset "VOXBRIDGE_PROFILE_ROOT=%LOCALAPPDATA%\\OMOI-VoxBridge-Standalone"\r\n"%~dp0venv\\Scripts\\python.exe" -I -m voxbridge.diagnostics\r\necho.\r\npause\r\n',
             encoding="ascii",newline="")
         print("INSTALL_PASS",target,flush=True)
         return 0

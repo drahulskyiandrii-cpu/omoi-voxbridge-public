@@ -24,6 +24,25 @@ VoxBridge normal beenden und dann nur den eigenen Installationsordner
 entfernen. Benutzerprofile und Modellordner nicht automatisch löschen.
 Dies ist ein Python-basierter Installer, kein selbstenthaltendes EXE/MSI.
 
+## Start und Desktop-Verknüpfungen
+
+Nach erfolgreicher unabhängiger Installation können Verknüpfungen erstellt werden:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/create_shortcuts.ps1
+```
+
+Optional mit -SourceDir und einem absoluten Pfad zur geprüften
+Quellcode-Fassung (mit SOURCE_MANIFEST.json). Das Skript erzeugt
+OMOI VoxBridge, Diagnose und optional Praesentation auf dem Desktop.
+Abweichende vorhandene Verknüpfungen werden nicht überschrieben.
+Es startet keine Anwendung und aktiviert keinen Autostart.
+Der unabhängige Start verwendet standardmäßig das separate Profil
+OMOI-VoxBridge-Standalone und öffnet das Kontrollzentrum. Eine Sperrdatei verhindert mehrere
+unabhängige Instanzen mit demselben Profil.
+
+## Windows Sandbox
+
 Windows Sandbox: scripts/sandbox_acceptance.ps1 ist ein expliziter
 Test für eine frische VM, keine normale Installation. Die VM soll
 keinen Netzwerk-, GPU-, Mikrofon- oder Clipboard-Zugriff haben.

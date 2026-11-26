@@ -37,6 +37,17 @@ class PresentationAssetsTests(unittest.TestCase):
         for script in re.findall(r"^\| `(scripts/[^\x60]+)` \|", text, re.M):
             self.assertTrue((ROOT / script).is_file(), script)
 
+    def test_root_launchers_exist_and_start_does_not_install(self):
+        for name in ("Setup-VoxBridge.cmd","Start-VoxBridge.cmd","Doctor.cmd","Demo-Untertitel.cmd"):
+            text = (ROOT/name).read_text(encoding="ascii")
+            self.assertIn("%~dp0", text)
+            self.assertNotIn("C:\\Users\\", text)
+        start = (ROOT/"Start-VoxBridge.cmd").read_text(encoding="ascii")
+        self.assertIn("main_standalone()", start)
+        self.assertNotIn("pip install", start)
+        self.assertNotIn("install-dev.ps1", start)
+        self.assertTrue((ROOT/"scripts/create_shortcuts.ps1").is_file())
+
     def test_offline_demo_from_source(self):
         keys = {"SYSTEMROOT", "WINDIR", "SYSTEMDRIVE", "PATH", "TEMP", "TMP",
                 "USERPROFILE", "APPDATA", "LOCALAPPDATA", "HOME"}
