@@ -93,6 +93,7 @@ Die Oberfläche bleibt von Inferenz und Gerätezugriff getrennt. Sitzungs-IDs ve
 | [Ordner und Dateien](docs/DATEIEN.md) | Einfache Pfade, Dateikarte und Konfigurationsordner |
 | [Architektur](docs/ARCHITEKTUR.md) | Module, Datenfluss und Windows-Schnittstellen |
 | [Installation](docs/INSTALLATION.md) | Wheel, lokale Laufzeiten, API-Konfiguration und Sandbox |
+| [KI-gestützte Einrichtung (RU)](docs/AI_SETUP_GUIDE.md) | Einrichtung, Hardware-Anpassung und individuelle Quellcode-Erweiterung mit ChatGPT/Codex |
 | [Prüfungen](docs/TESTS.md) | Reproduzierbare Tests, Abnahmestand und Grenzen |
 | [MIT-Lizenz](LICENSE) | Lizenz des enthaltenen Quellcodes |
 | [Lizenzumfang](LICENSE_STATUS.md) | Abgrenzung externer Komponenten |
